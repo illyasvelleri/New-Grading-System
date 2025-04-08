@@ -78,6 +78,7 @@ export default function AdminDashboard() {
 
             {/* Create Section Form */}
             <div className="bg-white p-6 rounded-2xl shadow mb-6">
+
                 <h2 className="text-xl font-semibold mb-4">Create New Section</h2>
                 <form onSubmit={handleCreateSection} className="grid gap-4 sm:grid-cols-3">
                     <input
@@ -111,8 +112,14 @@ export default function AdminDashboard() {
                         Create Section
                     </button>
                 </form>
+                
             </div>
-
+            <button
+                onClick={() => router.push(`/admin/users/get-users`)}
+                className="inline-block text-blue-600 mt-2 hover:underline"
+            >
+                Get Users
+            </button>
             {/* Section List */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {(sections || []).map((section) => (

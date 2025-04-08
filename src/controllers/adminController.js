@@ -5,9 +5,9 @@ import db from "@/lib/db";
 import Admin from "@/models/Admin";
 import Section from "@/models/Section";
 import Table from "@/models/Table"; // Assuming you have a Table model
+import UserTableData from "@/models/UserTableData";
+import User from "@/models/User";
 import mongoose from "mongoose";
-
-const SECRET_KEY = process.env.SECRET_KEY;
 
 
 // Admin Login
@@ -15,18 +15,13 @@ export const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        console.log("Received Email:", email);
-        console.log("Received Password:", password);
-        console.log("Admin Email from ENV:", process.env.ADMIN_EMAIL);
-        console.log("Admin Password from ENV:", process.env.ADMIN_PASSWORD);
-
         // Compare with environment variables
         if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
             return res.status(401).json({ error: "Invalid Email or Password" });
         }
 
         // Generate JWT token
-        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ email, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
         // Set token in HTTP-only cookie
         res.setHeader(
@@ -307,9 +302,9 @@ export const updateTable = async (req, res) => {
         // Update table properties
         existingTable.tableName = table.tableName;
         existingTable.columns = table.columns;
-        
-         // ✅ Ensure each cell respects the column's `isEditable`
-         if (Array.isArray(table.data)) {
+
+        // ✅ Ensure each cell respects the column's `isEditable`
+        if (Array.isArray(table.data)) {
             existingTable.data = table.data.map((row, rowIndex) => ({
                 rowNumber: row.rowNumber,
                 columns: row.columns.map((col, colIndex) => ({
@@ -326,5 +321,41 @@ export const updateTable = async (req, res) => {
     } catch (error) {
         console.error("Error updating table:", error);
         res.status(500).json({ message: "Server Error" });
+    }
+};
+
+
+export const getAllUsers = async (req, res) => {
+    console.log("get ALL users:", req.body);
+    try {
+        await db();
+        const users = await User.find({}).lean();
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getUserSections = async (req, res) => {
+    const { id } = req.query;
+    console.log("user sections:", req.query);
+    try {
+        const sections = await Section.find();
+        res.status(200).json({ sections });
+    } catch (err) {
+        console.error("Error fetching user sections:", err);
+        res.status(500).json({ error: "Failed to fetch user sections" });
+    }
+};
+
+export const getTablesByUserAndSection = async (req, res) => {
+    console.log("user tablessss", req.query)
+    try {
+        const tables = await UserTableData.find({ section: sectionId, user: userId }).populate("user").lean();
+        return tables;
+    } catch (error) {
+        console.error("Error in getTablesByUserAndSection:", error);
+        throw error;
     }
 };

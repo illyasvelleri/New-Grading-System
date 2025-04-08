@@ -5,6 +5,7 @@ import User from "@/models/User";
 import Section from "@/models/Section";
 import Table from "@/models/Table";
 import UserTableData from "@/models/UserTableData";
+import mongoose from "mongoose";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -105,44 +106,56 @@ export const listSection = async (req, res) => {
     }
 };
 
-
 export const viewSection = async (req, res) => {
-    await db();
-
-    // 🔐 Extract JWT token from cookies
-    const token = req.cookies?.authToken;
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
-
     try {
-        // 🔑 Verify JWT and get user ID
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const userId = decoded.userId;
+        await db();
 
+        const token = req.cookies?.authToken;
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
         console.log("👤 Authenticated User ID:", userId);
 
-        const { id } = req.query; // Section ID from URL
-        console.log("📌 Section ID:", id);
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: "Missing Section ID." });
+        if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid Section ID format." });
 
         const section = await Section.findById(id);
-        if (!section) {
-            return res.status(404).json({ error: "Section Not Found" });
-        }
+        console.log("section:", section);
+        if (!section) return res.status(404).json({ error: "Section Not Found" });
 
-        let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user").lean();
+        const userTables = await UserTableData.find({ section: section._id, user: userId }).populate("user").lean();
+        console.log("user tables:", JSON.stringify(userTables, null, 2));
+
+        const adminTables = await Table.find({ section: section._id }).populate("section").lean();
+        console.log("admin tables:", JSON.stringify(adminTables, null, 2));
+
         let tables = [];
 
-        if (userTableData) {
-            let adminTable = await Table.findById(section._id).populate("section").lean();
-            if (adminTable) {
-                userTableData = mergeUserTableWithAdmin(userTableData, adminTable);
-            }
-            formatTableData(userTableData);
-            tables.push(userTableData);
+        if (userTables.length > 0) {
+            userTables.forEach(userTable => {
+                const matchingAdminTable = adminTables.find(admin => 
+                    admin._id.toString() === userTable.table?.toString()
+                );
+                console.log(`Matching admin table for user table ${userTable._id}:`, matchingAdminTable);
+
+                let processedTable = userTable;
+                if (matchingAdminTable) {
+                    processedTable = mergeUserTableWithAdmin(userTable, matchingAdminTable); // No merging
+                }
+                formatTableData(processedTable);
+                tables.push(processedTable);
+            });
         }
 
-        let newTables = await checkNewTables(userId, section._id);
-        newTables.forEach(formatTableData);
-        tables.push(...newTables);
+        const userTableRefs = new Set(userTables.map(ut => ut.table?.toString()));
+        const newAdminTables = adminTables.filter(admin => 
+            !userTableRefs.has(admin._id.toString())
+        );
+        console.log("new admin tables:", JSON.stringify(newAdminTables, null, 2));
+        newAdminTables.forEach(formatTableData);
+        tables.push(...newAdminTables);
 
         if (!tables.length) {
             return res.status(404).json({ error: "No tables available for this section." });
@@ -151,45 +164,31 @@ export const viewSection = async (req, res) => {
         res.status(200).json({ section, tables });
     } catch (err) {
         console.error("❌ Error in viewSection:", err);
-        res.status(401).json({ error: "Invalid or Expired Token" });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
-const mergeUserTableWithAdmin = (userTableData, adminTable) => {
-    let updatedTable = { ...userTableData };
+const mergeUserTableWithAdmin = (userTable, adminTable) => {
+    console.log("🔄 Processing User Table (No Merging)");
+    console.log("User Table:", JSON.stringify(userTable, null, 2));
+    console.log("Admin Table (Reference Only):", JSON.stringify(adminTable, null, 2));
 
-    let userColumnNames = new Set(userTableData.columns.map(col => col.name));
-    adminTable.columns.forEach(col => {
-        if (!userColumnNames.has(col.name)) {
-            updatedTable.columns.push({ name: col.name, type: col.type || "text", isEditable: false });
-        }
-    });
+    let updatedTable = { ...userTable };
 
-    let userRowsById = new Map(userTableData.data.map(row => [row.id, row]));
-    updatedTable.data = adminTable.data.map(adminRow => userRowsById.get(adminRow.id) || adminRow);
-
+    console.log("Final Table (Unchanged):", JSON.stringify(updatedTable, null, 2));
     return updatedTable;
 };
 
-const checkNewTables = async (userId, sectionId) => {
-    try {
-        const allTables = await Table.find({ section: sectionId }).lean();
-        const userSavedTable = await UserTableData.findOne({ user: userId, section: sectionId }).lean();
-
-        if (!userSavedTable) return allTables;
-        return allTables.filter(table => table._id.toString() !== userSavedTable.table.toString());
-    } catch (error) {
-        console.error("❌ Error checking new tables:", error);
-        return [];
-    }
-};
-
 const formatTableData = (table) => {
+    console.log("🎨 Formatting Table Data:", JSON.stringify(table, null, 2));
+
     table.columns = table.columns.map(col => ({ ...col, isEditable: col.isEditable === true }));
 
     table.data.forEach(row => {
         row.columns = row.columns.map(col => {
             const matchingColumn = table.columns.find(tc => tc.name === col.columnName);
+            console.log(`📌 Formatting Column: ${col.columnName}, Found Matching:`, matchingColumn);
+
             return {
                 name: col.columnName || "Unnamed Column",
                 value: col.value || "",
@@ -198,227 +197,330 @@ const formatTableData = (table) => {
             };
         });
     });
+
+    console.log("✅ Formatted Table Data:", JSON.stringify(table, null, 2));
 };
 
+// const mergeUserTableWithAdmin = (userTableData, adminTable) => {
+//     let updatedTable = { ...userTableData };
 
-// export async function saveUserTable(req, res) {
-//     await db(); // Ensure DB connection
-//     console.log("📥 Incoming Request Body:", req.body);
+//     let userColumnNames = new Set(userTableData.columns.map(col => col.name));
+//     adminTable.columns.forEach(col => {
+//         if (!userColumnNames.has(col.name)) {
+//             updatedTable.columns.push({ name: col.name, type: col.type || "text", isEditable: false });
+//         }
+//     });
 
-//     // 🔐 Extract JWT token from cookies
-//     const token = req.cookies?.authToken;
-//     if (!token) return res.status(401).json({ error: "Unauthorized" });
+//     let userRowsById = new Map(userTableData.data.map(row => [row._id, row]));
+//     updatedTable.data = adminTable.data.map(adminRow => userRowsById.get(adminRow.id) || adminRow);
 
+//     return updatedTable;
+// };
+
+// const checkNewTables = async (userId, sectionId) => {
+//     console.log("recive in checkNewTables", userId, sectionId);
 //     try {
-//         // 🔑 Decode JWT token to get user ID
-//         const decoded = jwt.verify(token, JWT_SECRET);
-//         const userId = decoded.userId;
-//         console.log("👤 Authenticated User ID:", userId);
-
-//         // Extract request body data
-//         const { sectionId, tableId, data } = req.body;
-
-//         if (!sectionId || !tableId || !data) {
-//             console.error("❌ Missing required fields:", { userId, sectionId, tableId, data });
-//             return res.status(400).json({ error: "Missing required fields." });
-//         }
-
-//         // ✅ Extract unique column structure
-//         const columns = data?.[0]?.columns.map(col => ({
-//             name: col.name,
-//             type: col.type || "text",
-//             isEditable: col.isEditable === "true",
-//         })) || [];
-
-//         // ✅ Format and structure the data
-//         const formattedData = data.map((row, rowIndex) => ({
-//             rowNumber: rowIndex + 1,
-//             columns: row.columns.map((col) => {
-//                 // 🔹 Match column by name and ensure boolean conversion for isEditable
-//                 const columnConfig = columns.find(c => c.name === col.name);
-
-//                 return {
-//                     columnName: col.name,
-//                     value: col.value || col.radioValue || "",
-//                     type: col.type || "text",
-//                     isEditable: columnConfig ? !!columnConfig.isEditable : false,  // ✅ Convert to boolean
-//                 };
-//             }),
-//         }));
-
-//         console.log("📝 Formatted Data:", JSON.stringify(formattedData, null, 2));
-
-//         // 📝 Count rows in formatted data
-//         const rowsCount = formattedData.length;
-//         console.log("📊 Rows Count:", rowsCount);
-
-//         // 🔄 Check if the user already has data for this table
-//         let userTable = await UserTableData.findOne({ user: userId, table: tableId });
-
-//         if (userTable) {
-//             // 🆙 Update existing table data
-//             userTable.data = formattedData;
-//             userTable.rowsCount = rowsCount;
-//             userTable.updatedAt = new Date();
-//             await userTable.save();
-//             console.log("✅ Table data updated successfully.");
-//         } else {
-//             // 🆕 Create new table entry
-//             userTable = new UserTableData({
-//                 user: userId,
-//                 section: sectionId,
-//                 table: tableId,
-//                 rowsCount,
-//                 data: formattedData,
-//             });
-//             await userTable.save();
-//             console.log("✅ New table data saved successfully.");
-//         }
-
-//         return res.status(200).json({ message: "Table data saved successfully!", userTable });
+//         const allTables = await Table.find({ section: sectionId }).lean();
+//         console.log("tables in all tables:", allTables);
+//         const userSavedTable = await UserTableData.findOne({ user: userId, section: sectionId }).lean();
+//         console.log("user saved table under function of tables in all tables:", userSavedTable);
+//         if (!userSavedTable) return allTables;
+//         return allTables.filter(table => userSavedTable.table && table._id.toString() !== userSavedTable.table.toString());
 //     } catch (error) {
-//         console.error("❌ Error saving user table:", error);
-//         return res.status(500).json({ error: "Internal Server Error" });
+//         console.error("❌ Error checking new tables:", error);
+//         return [];
 //     }
-// }
+// };
+
+// const formatTableData = (table) => {
+//     table.columns = table.columns.map(col => ({ ...col, isEditable: col.isEditable === true }));
+
+//     table.data.forEach(row => {
+//         row.columns = row.columns.map(col => {
+//             const matchingColumn = table.columns.find(tc => tc.name === col.columnName);
+//             return {
+//                 name: col.columnName || "Unnamed Column",
+//                 value: col.value || "",
+//                 type: col.type || matchingColumn?.type || "text",
+//                 isEditable: col.isEditable !== undefined ? col.isEditable : matchingColumn?.isEditable || false,
+//             };
+//         });
+//     });
+// };
 
 
-// export async function saveUserTable(req, res) {
-//     await db(); // Ensure DB connection
-//     console.log("📥 Incoming Request Body:", req.body);
-
-//     const token = req.cookies?.authToken;
-//     if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-//     try {
-//         // 🔑 Decode JWT token to get user ID
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         const userId = decoded.userId;
-//         console.log("👤 Authenticated User ID:", userId);
-
-//         // Extract request body data
-//         const { sectionId, tableId, data } = req.body;
-
-//         if (!sectionId || !tableId || !data || !Array.isArray(data)) {
-//             console.error("❌ Invalid data format:", { userId, sectionId, tableId, data });
-//             return res.status(400).json({ error: "Invalid or missing data." });
-//         }
-
-//         // 🔍 Check if user already has this table data
-//         let userTable = await UserTableData.findOne({ userId, tableId });
-
-//         if (userTable) {
-//             // 🆙 Update existing table data
-//             userTable.data = data.map((row, rowIndex) => ({
-//                 rowNumber: row.rowNumber,
-//                 columns: row.columns.map((col, colIndex) => ({
-//                     columnName: userTable.columns[colIndex]?.name,
-//                     value: col.value || "",
-//                     type: col.type || "text",
-//                     isEditable: userTable.columns[colIndex]?.isEditable ?? false,
-//                 })),
-//             }));
-//             userTable.updatedAt = new Date();
-//             await userTable.save();
-//             console.log("✅ Table data updated successfully.");
-//         } else {
-//             // 🆕 Create new table entry
-//             userTable = new UserTableData({
-//                 userId,
-//                 sectionId,
-//                 tableId,
-//                 columns: data[0]?.columns || [], // Ensure columns exist
-//                 data: data.map((row, rowIndex) => ({
-//                     rowNumber: rowIndex + 1,
-//                     columns: row.columns.map((col, colIndex) => ({
-//                         columnName: data[0]?.columns[colIndex]?.name,
-//                         value: col.value || "",
-//                         type: col.type || "text",
-//                         isEditable: data[0]?.columns[colIndex]?.isEditable ?? false,
-//                     })),
-//                 })),
-//             });
-//             await userTable.save();
-//             console.log("✅ New table data saved successfully.");
-//         }
-
-//         return res.status(200).json({ message: "Table data saved successfully!", userTable });
-//     } catch (error) {
-//         console.error("❌ Error saving user table:", error);
-//         return res.status(500).json({ error: "Internal Server Error" });
-//     }
-// }
-
-
-export async function saveUserTable(req, res) {
-    await db(); // Ensure DB connection
-    console.log("📥 Incoming Request Body:", req.body);
-
-    const token = req.cookies?.authToken;
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
-
+export const saveUserTable = async (req) => {
     try {
-        const userId = getUserIdFromToken(token); // Extract user ID from token
-        const { sectionId, tableId, data: rawData } = req.body;
+        await db();
 
-        if (!userId || !sectionId || !tableId || typeof rawData !== "object") {
-            return res.status(400).json({ error: "Invalid or missing data." });
+        const { sectionId, tableId, table } = req.body;
+        console.log("Received:", req.body);
+        const token = req.cookies?.authToken;
+
+        if (!token) {
+            return { status: 401, data: { error: "Unauthorized" } };
         }
 
-        // ✅ Convert raw data into a structured format
-        const formattedData = parseTableData(rawData);
+        const userId = getUserIdFromToken(token);
+        console.log("User (raw):", userId);
 
-        // 🔍 Find existing user table entry
-        let userTable = await UserTableData.findOne({ user: userId, table: tableId });
+        if (!userId || !sectionId || !tableId || !table) {
+            return { status: 400, data: { message: "User ID, Section ID, Table ID, and Table Data are required" } };
+        }
 
-        if (userTable) {
-            userTable.data = formattedData;
-            userTable.rowsCount = formattedData.length; // Update rows count
-            userTable.updatedAt = new Date();
+        console.log("Raw userId:", userId);
+        console.log("Raw sectionId:", sectionId);
+        console.log("Raw tableId:", tableId);
+        console.log("Raw table data:", table);
+
+        const isValidHexString = (str) => {
+            return typeof str === 'string' && str.length === 24 && /^[0-9a-fA-F]{24}$/.test(str);
+        };
+
+        const userIdStr = String(userId);
+        const sectionIdStr = String(sectionId);
+        const tableIdStr = String(tableId);
+
+        if (!isValidHexString(userIdStr)) {
+            return { status: 400, data: { message: "Invalid userId: must be a 24-character hex string", value: userIdStr } };
+        }
+        if (!isValidHexString(sectionIdStr)) {
+            return { status: 400, data: { message: "Invalid sectionId: must be a 24-character hex string", value: sectionIdStr } };
+        }
+        if (!isValidHexString(tableIdStr)) {
+            return { status: 400, data: { message: "Invalid tableId: must be a 24-character hex string", value: tableIdStr } };
+        }
+
+        const userObjectId = new mongoose.Types.ObjectId(userIdStr);
+        const sectionObjectId = new mongoose.Types.ObjectId(sectionIdStr);
+        const tableObjectId = new mongoose.Types.ObjectId(tableIdStr);
+        // Temporary: Using tableId as table reference until frontend sends tableRef
+        const tableRefObjectId = new mongoose.Types.ObjectId(tableIdStr);
+
+        console.log("Converted userObjectId:", userObjectId);
+        console.log("Converted sectionObjectId:", sectionObjectId);
+        console.log("Converted tableObjectId:", tableObjectId);
+        console.log("Converted tableRefObjectId (temporary):", tableRefObjectId);
+
+        console.log("Querying UserTableData with:", {
+            _id: tableObjectId,
+            user: userObjectId,
+            section: sectionObjectId
+        });
+        let existingTable = await UserTableData.findOne({
+            _id: tableObjectId,
+            user: userObjectId,
+            section: sectionObjectId
+        });
+        console.log("Found existingTable:", existingTable ? "Yes" : "No", existingTable);
+
+        if (!existingTable) {
+            const newTableData = {
+                _id: tableObjectId,
+                user: userObjectId,
+                section: sectionObjectId,
+                table: tableRefObjectId,
+                columns: table.columns || [],
+                rowsCount: table.rowsCount !== undefined ? table.rowsCount : 0,
+                data: table.data || [],
+                tableDescription: table.tableDescription || "",
+                totalMarks: table.totalMarks || [],
+                maxMarks: table.maxMarks || [],
+                percentage: table.percentage || []
+            };
+            console.log("Creating new UserTableData with:", JSON.stringify(newTableData, null, 2));
+            existingTable = new UserTableData(newTableData);
+            console.log("New table instance created:", JSON.stringify(existingTable.toObject(), null, 2));
         } else {
-            userTable = new UserTableData({
-                user: userId,
-                section: sectionId,
-                table: tableId,
-                rowsCount: formattedData.length,
-                data: formattedData,
-            });
+            console.log("Updating existing table...");
+            existingTable.columns = table.columns || existingTable.columns;
+            existingTable.rowsCount = table.rowsCount !== undefined ? table.rowsCount : existingTable.rowsCount;
+            existingTable.data = table.data || existingTable.data;
+            existingTable.tableDescription = table.tableDescription || existingTable.tableDescription;
+            existingTable.totalMarks = table.totalMarks || existingTable.totalMarks;
+            existingTable.maxMarks = table.maxMarks || existingTable.maxMarks;
+            existingTable.percentage = table.percentage || existingTable.percentage;
+            existingTable.table = tableRefObjectId;
+
+            if (Array.isArray(table.data)) {
+                console.log("Mapping table.data:", table.data);
+                existingTable.data = table.data.map((row) => ({
+                    rowNumber: row.rowNumber,
+                    columns: row.columns.map((col, colIndex) => ({
+                        columnName: table.columns[colIndex]?.name || col.columnName,
+                        value: col.value || "",
+                        type: col.type || "text",
+                        isEditable: table.columns[colIndex]?.isEditable ?? col.isEditable ?? false,
+                    })),
+                }));
+            }
+            console.log("Updated existingTable data:", existingTable.data);
         }
 
-        await userTable.save();
-        return res.status(200).json({ message: "Table data saved successfully!", userTable });
+        console.log("Saving table...");
+        await existingTable.save();
+        console.log("Table saved successfully:", existingTable);
+
+        return { status: 200, data: { message: "Table saved successfully", table: existingTable } };
     } catch (error) {
-        console.error("❌ Error saving user table:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error saving table:", error);
+        return { status: 500, data: { message: "Server Error", error: error.message } };
     }
-}
+};
+
 function getUserIdFromToken(token) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return decoded.userId;
+        return String(decoded.userId);
     } catch (error) {
         return null;
     }
 }
-function parseTableData(rawData) {
-    const parsedData = [];
 
-    Object.keys(rawData).forEach((key) => {
-        const match = key.match(/^data\[(\d+)]\[columns]\[(\d+)]\[value]$/);
-        if (match) {
-            const rowIndex = Number(match[1]);
-            const colIndex = Number(match[2]);
+// export const saveUserTable = async (req) => {
+//     try {
+//         await db(); // Ensure DB connection
 
-            if (!parsedData[rowIndex]) parsedData[rowIndex] = { rowNumber: rowIndex + 1, columns: [] };
+//         const { sectionId, table } = req.body; // Expect user & section to find/create the table
+//         console.log("recived:", req.body);
+//         const token = req.cookies?.authToken;
 
-            parsedData[rowIndex].columns[colIndex] = {
-                columnName: `Column ${colIndex + 1}`,
-                value: rawData[key] || "",
-                type: "text",
-                isEditable: true, // Adjust if needed
-            };
-        }
-    });
+//         if (!token) {
+//             return { status: 401, data: { error: "Unauthorized" } };
+//         }
 
-    return parsedData;
-}
+//         const userId = getUserIdFromToken(token);
+//         console.log("user:", userId);
+
+//         if (!userId || !sectionId || !table) {
+//             return { status: 400, data: { message: "User ID, Section ID, and Table Data are required" } };
+//         }
+
+//         let existingTable = await UserTableData.findOne({ user: userId, section: sectionId });
+
+//         if (!existingTable) {
+//             // If no table exists, create a new one
+//             existingTable = new UserTableData({
+//                 user: userId,
+//                 section: sectionId,
+//                 table: table.tableId,
+//                 columns: table.columns,
+//                 rowsCount: table.rowsCount || 0,
+//                 data: table.data || [],
+//                 tableDescription: table.tableDescription || "",
+//                 totalMarks: [],
+//                 maxMarks: [],
+//                 percentage: [],
+//             });
+//         } else {
+//             // If table exists, update it
+//             existingTable.columns = table.columns;
+//             existingTable.rowsCount = table.rowsCount;
+
+//             if (Array.isArray(table.data)) {
+//                 existingTable.data = table.data.map((row) => ({
+//                     rowNumber: row.rowNumber,
+//                     columns: row.columns.map((col, colIndex) => ({
+//                         columnName: table.columns[colIndex]?.name,
+//                         value: col.value || "",
+//                         type: col.type || "text",
+//                         isEditable: table.columns[colIndex]?.isEditable ?? false,
+//                     })),
+//                 }));
+//             }
+//         }
+
+//         await existingTable.save();
+
+//         return { status: 200, data: { message: "Table saved successfully", table: existingTable } };
+//     } catch (error) {
+//         console.error("Error saving table:", error);
+//         return { status: 500, data: { message: "Server Error", error: error.message } };
+//     }
+// };
+
+
+
+// function getUserIdFromToken(token) {
+//     try {
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//         return decoded.userId;
+//     } catch (error) {
+//         return null;
+//     }
+// }
+
+
+
+// export async function saveUserTable(req, res) {
+//     await db(); // Ensure DB connection
+//     console.log("📥 Incoming Request Body:", req.body);
+
+//     const token = req.cookies?.authToken;
+//     if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+//     try {
+//         const userId = getUserIdFromToken(token); // Extract user ID from token
+//         const { sectionId, tableId, data: rawData } = req.body;
+
+//         if (!userId || !sectionId || !tableId || typeof rawData !== "object") {
+//             return res.status(400).json({ error: "Invalid or missing data." });
+//         }
+
+//         // ✅ Convert raw data into a structured format
+//         const formattedData = parseTableData(rawData);
+
+//         // 🔍 Find existing user table entry
+//         let userTable = await UserTableData.findOne({ user: userId, table: tableId });
+
+//         if (userTable) {
+//             userTable.data = formattedData;
+//             userTable.rowsCount = formattedData.length; // Update rows count
+//             userTable.updatedAt = new Date();
+//         } else {
+//             userTable = new UserTableData({
+//                 user: userId,
+//                 section: sectionId,
+//                 table: tableId,
+//                 rowsCount: formattedData.length,
+//                 data: formattedData,
+//             });
+//         }
+
+//         await userTable.save();
+//         return res.status(200).json({ message: "Table data saved successfully!", userTable });
+//     } catch (error) {
+//         console.error("❌ Error saving user table:", error);
+//         return res.status(500).json({ error: "Internal Server Error" });
+//     }
+// }
+// function getUserIdFromToken(token) {
+//     try {
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//         return decoded.userId;
+//     } catch (error) {
+//         return null;
+//     }
+// }
+// function parseTableData(rawData) {
+//     const parsedData = [];
+
+//     Object.keys(rawData).forEach((key) => {
+//         const match = key.match(/^data\[(\d+)]\[columns]\[(\d+)]\[value]$/);
+//         if (match) {
+//             const rowIndex = Number(match[1]);
+//             const colIndex = Number(match[2]);
+
+//             if (!parsedData[rowIndex]) parsedData[rowIndex] = { rowNumber: rowIndex + 1, columns: [] };
+
+//             parsedData[rowIndex].columns[colIndex] = {
+//                 columnName: `Column ${colIndex + 1}`,
+//                 value: rawData[key] || "",
+//                 type: "text",
+//                 isEditable: true, // Adjust if needed
+//             };
+//         }
+//     });
+
+//     return parsedData;
+// }
