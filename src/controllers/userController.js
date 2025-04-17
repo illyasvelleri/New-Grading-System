@@ -21,7 +21,7 @@ export async function registerUser(req, res) {
     }
 
     // Destructure body
-    const { username, email, password } = req.body;
+    const { username, email, category, password } = req.body;
     console.log("Request body:", req.body);
 
     // Check if email is already taken
@@ -40,7 +40,7 @@ export async function registerUser(req, res) {
 
     // Create new user
     try {
-        const newUser = await User.create({ username, email, password: hashedPassword });
+        const newUser = await User.create({ username, email, category, password: hashedPassword });
         console.log("New user created:", newUser);
 
         // Respond with success
@@ -58,9 +58,12 @@ export async function loginUser(req, res) {
 
     if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // 🔍 Find user by email OR username
+    const user = await User.findOne({
+        $or: [{ email: identifier }, { username: identifier }]
+    });
     if (!user) return res.status(400).json({ error: "Invalid email or password" });
 
     // Compare password
@@ -96,8 +99,21 @@ export const listSection = async (req, res) => {
     try {
         await db(); // Ensure database connection
 
-        const sections = await Section.find();
-        if (!sections.length) return res.status(404).json({ error: "No Sections Found" });
+        // 1. Get token from cookies
+        const token = req.cookies?.authToken;
+        if (!token) return res.status(401).json({ error: "Unauthorized: No token" });
+
+        // 2. Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // 3. Filter sections by user's category
+        const sections = await Section.find({ sectionCategory: user.category });
+
+        if (!sections.length) {
+            return res.status(404).json({ error: "No Sections Found for your category" });
+        }
 
         res.status(200).json({ sections });
     } catch (error) {
@@ -135,7 +151,7 @@ export const viewSection = async (req, res) => {
 
         if (userTables.length > 0) {
             userTables.forEach(userTable => {
-                const matchingAdminTable = adminTables.find(admin => 
+                const matchingAdminTable = adminTables.find(admin =>
                     admin._id.toString() === userTable.table?.toString()
                 );
                 console.log(`Matching admin table for user table ${userTable._id}:`, matchingAdminTable);
@@ -150,7 +166,7 @@ export const viewSection = async (req, res) => {
         }
 
         const userTableRefs = new Set(userTables.map(ut => ut.table?.toString()));
-        const newAdminTables = adminTables.filter(admin => 
+        const newAdminTables = adminTables.filter(admin =>
             !userTableRefs.has(admin._id.toString())
         );
         console.log("new admin tables:", JSON.stringify(newAdminTables, null, 2));
@@ -376,6 +392,191 @@ function getUserIdFromToken(token) {
         return null;
     }
 }
+
+
+
+
+
+// export const calcSections = async (req, res) => {
+//     console.log("recived!...", req.body);
+//     console.log("recived!...", req.query);
+//     try {
+//         await db();
+//         const { category } = req.query;
+//         const token = req.cookies?.authToken;
+
+//         if (!token) {
+//             return { status: 401, data: { error: "Unauthorized" } };
+//         }
+
+//         const userId = getUserIdFromToken(token);
+//         console.log("User (raw):", userId);
+
+//         if (!userId || !category) {
+//             return { status: 400, data: { message: "User ID, category are required" } };
+//         }
+
+//         // Fetch all admin sections for this category
+//         const adminSections = await Section.find({ sectionCategory: category });
+//         console.log(adminSections);
+//         const totalMaxScore = adminSections.reduce(
+//             (sum, section) => sum + (section.maxMark || 0),
+//             0
+//         );
+//         console.log("max---", totalMaxScore);
+//         const totalSections = adminSections.length;
+
+//         // Fetch all answers from the user
+//         const userDatas = await UserTableData.find({ user: userId });
+//         console.log('userrrr', userDatas);
+//         const totalUserScore = userDatas.reduce(
+//             (sum, answer) => sum + (answer.score || 0),
+//             0
+//         );
+
+//         const sectionsCompleted = userDatas.length;
+
+//         return res.status(200).json({
+//             totalMaxScore,
+//             totalUserScore,
+//             sectionsCompleted,
+//             totalSections,
+//             avgScore: totalMaxScore
+//                 ? Math.round((totalUserScore / totalMaxScore) * 100)
+//                 : 0,
+//         });
+//     } catch (error) {
+//         console.error("Error in calcSection:", error);
+//         res.status(500).json({ error: "Server Error" });
+//     }
+// };
+// export const calcSections = async (req, res) => {
+//     console.log("📥 Received Request Body:", req.body);
+//     console.log("📥 Received Query:", req.query);
+    
+//     try {
+//         await db();
+//         const { category } = req.query;
+//         const token = req.cookies?.authToken;
+
+//         if (!token) {
+//             return res.status(401).json({ error: "Unauthorized" });
+//         }
+
+//         const userId = getUserIdFromToken(token);
+//         console.log("🔐 User ID:", userId);
+
+//         if (!userId || !category) {
+//             return res.status(400).json({ message: "User ID and category are required" });
+//         }
+
+//         // 🔍 Fetch all sections for this category
+//         const adminSections = await Section.find({ sectionCategory: category });
+//         const totalSections = adminSections.length;
+
+//         // 📊 Fetch all table data for this user
+//         const userDatas = await UserTableData.find({ user: userId });
+//         const sectionsCompleted = userDatas.length;
+
+//         // 🔢 Calculate total marks and max marks from user tables
+//         let totalUserScore = 0;
+//         let totalMaxScore = 0;
+
+//         userDatas.forEach((table) => {
+//             const tableTotal = Array.isArray(table.totalMarks) ? Number(table.totalMarks[0] || 0) : 0;
+//             const tableMax = Array.isArray(table.maxMarks) ? Number(table.maxMarks[0] || 0) : 0;
+
+//             totalUserScore += tableTotal;
+//             totalMaxScore += tableMax;
+//         });
+
+//         const avgScore = totalMaxScore
+//             ? Math.round((totalUserScore / totalMaxScore) * 100)
+//             : 0;
+
+//         return res.status(200).json({
+//             totalMaxScore,
+//             totalUserScore,
+//             sectionsCompleted,
+//             totalSections,
+//             avgScore, // in percentage
+//         });
+
+//     } catch (error) {
+//         console.error("❌ Error in calcSections:", error);
+//         return res.status(500).json({ error: "Server Error" });
+//     }
+// };
+export const calcSections = async (req, res) => {
+    console.log("📥 Received Request Body:", req.body);
+    console.log("📥 Received Query:", req.query);
+
+    try {
+        await db();
+        const { category } = req.query;
+        const token = req.cookies?.authToken;
+
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const userId = getUserIdFromToken(token);
+        if (!userId || !category) {
+            return res.status(400).json({ message: "User ID and category are required" });
+        }
+
+        // ✅ Get admin section info for this category
+        const adminSections = await Section.find({ sectionCategory: category });
+        const totalSections = adminSections.length;
+
+        // Step 1: Find sections for the category
+const sections = await Section.find({ sectionCategory: category }).select('_id');
+const sectionIds = sections.map((s) => s._id);
+
+// Step 2: Find tables linked to those sections
+const adminTable = await Table.find({ section: { $in: sectionIds } });
+
+// Step 3: Calculate total max marks from tables
+const totalMaxScore = adminTable.reduce((sum, table) => {
+    const tableMax = Array.isArray(table.maxMarks)
+        ? table.maxMarks.reduce((acc, val) => acc + (Number(val) || 0), 0)
+        : 0;
+    return sum + tableMax;
+}, 0);
+
+
+        // ✅ Get user data (saved tables)
+        const userDatas = await UserTableData.find({ user: userId });
+        const sectionsCompleted = userDatas.length;
+
+        // 🧮 Total user score from saved tables
+        let totalUserScore = 0;
+
+        userDatas.forEach((table) => {
+            const tableTotal = Array.isArray(table.totalMarks)
+                ? Number(table.totalMarks[0] || 0)
+                : 0;
+            totalUserScore += tableTotal;
+        });
+
+        // 📊 Calculate percentage
+        const avgScore = totalMaxScore
+            ? Math.round((totalUserScore / totalMaxScore) * 100)
+            : 0;
+
+        return res.status(200).json({
+            totalMaxScore,         // from admin section
+            totalUserScore,        // from saved user tables
+            sectionsCompleted,
+            totalSections,
+            avgScore,
+        });
+
+    } catch (error) {
+        console.error("❌ Error in calcSections:", error);
+        return res.status(500).json({ error: "Server Error" });
+    }
+};
 
 // export const saveUserTable = async (req) => {
 //     try {

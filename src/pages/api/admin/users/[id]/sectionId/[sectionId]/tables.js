@@ -1,5 +1,5 @@
 import { verifyAuth } from "@/lib/auth";
-import { getTablesByUserAndSection } from "@/controllers/tableController";
+import { getTablesByUserAndSection } from "@/controllers/adminController";
 
 export default async function handler(req, res) {
     const admin = verifyAuth(req);

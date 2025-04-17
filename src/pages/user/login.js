@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 
 export default function Login() {
-    const [formData, setFormData] = useState({ email: "", password: "" });
+    const [formData, setFormData] = useState({ identifier: "", password: "" });
     const [error, setError] = useState("");
     const router = useRouter();
 
@@ -26,12 +26,14 @@ export default function Login() {
             <h1>User Login</h1>
             <form onSubmit={handleLogin}>
                 <input
-                    type="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    type="text"
+                    name="identifier"
+                    placeholder="Email or Username"
+                    value={formData.identifier}
+                    onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
                     required
                 />
+
                 <input
                     type="password"
                     placeholder="Password"

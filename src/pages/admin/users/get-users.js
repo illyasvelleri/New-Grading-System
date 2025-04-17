@@ -57,9 +57,9 @@ export default function UsersList() {
                             key={user._id}
                             className="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 relative"
                         >
-                            <h2 className="text-lg font-semibold text-gray-700">{user.name || "Unnamed User"}</h2>
+                            <h2 className="text-lg font-semibold text-gray-700">{user.username || "Un Named User"}</h2>
                             <p className="text-gray-500">Email: {user.email || "N/A"}</p>
-                            <p className="text-gray-500">ID: {user._id}</p>
+                            <p className="text-gray-500">ID: {user.category}</p>
 
                             <button
                                 onClick={() => goToUserPage(user._id)}

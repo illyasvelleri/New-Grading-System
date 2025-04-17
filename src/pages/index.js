@@ -1,5 +1,8 @@
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
+import { useState } from "react";
+import { ArrowDown, Clock, BookOpen, Users, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,102 +15,70 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
+  const [showCards, setShowCards] = useState(false);
+  const toggleCards = () => setShowCards(!showCards);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/pages/index.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+    <div className="min-h-screen bg-white font-sans px-6">
+
+    {/* Hero Section */}
+    <section className="relative min-h-[92vh] px-6 sm:px-10 pt-24 pb-36 text-white bg-gray-900 rounded-br-[8vw] rounded-bl-[8vw] shadow-inner overflow-hidden">
+      <div className="max-w-5xl mx-auto flex flex-col items-center sm:items-start text-center sm:text-left space-y-6 sm:space-y-8">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow-md">
+          Seek <span className="text-[#10b981] animate-pulse">Sacred Knowledge</span> with Guidance
+        </h1>
+  
+        <p className="text-base sm:text-lg lg:text-xl text-[#d1d5db] max-w-2xl leading-relaxed flex flex-wrap justify-center sm:justify-start gap-3">
+          <span className="inline-block bg-white/10 px-4 py-1.5 rounded-full text-white/90 font-medium backdrop-blur-sm">
+            📖 Qur’anic Sciences
+          </span>
+          <span className="inline-block bg-white/10 px-4 py-1.5 rounded-full text-white/90 font-medium backdrop-blur-sm">
+            🕌 Prophetic Teachings
+          </span>
+          <span className="inline-block bg-white/10 px-4 py-1.5 rounded-full text-white/90 font-medium backdrop-blur-sm">
+            🕋 Islamic Values
+          </span>
+        </p>
+  
+        <p className="text-sm sm:text-base lg:text-lg text-[#e5e7eb] italic max-w-xl">
+          “Educating <span className="text-[#10b981] font-semibold">450+</span> students with the light of Deen – every single day.”
+        </p>
+  
+        <button className="bg-[#10b981] hover:bg-[#064e3b] text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transition-all shadow-lg hover:scale-105">
+          ✨ Begin Your Journey of ‘Ilm
+        </button>
+      </div>
+    </section>
+  
+    {/* Revealed Cards Section with Scroll Animation */}
+    <section className="relative min-h-[92vh] bg-white px-6 sm:px-10 pt-24 pb-36 text-gray-900">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+        className="max-w-5xl mx-auto text-center sm:text-left space-y-6 sm:space-y-8"
+      >
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-5 text-[#10b981]">
+          Suhba: Uniting 35+ Darses Under One Vision
+        </h2>
+        <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto sm:mx-0">
+          Suhba serves as the unifying body for over 35 affiliated Darses, all under the guidance of Alathurpadi Dars. Together, these Darses work harmoniously to offer a blend of traditional teachings and modern academic excellence, enriching the lives of students and the community.
+        </p>
+        <p className="text-md sm:text-lg text-gray-600 italic">
+          "Educating over 200 students, Suhba is a sanctuary where knowledge meets spirituality, fostering a strong sense of community among its affiliated Darses."
+        </p>
+        <div className="flex justify-center sm:justify-start gap-4">
+          <button className="bg-[#10b981] hover:bg-[#064e3b] text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transition-all shadow-lg hover:scale-105">
+            ✨ Begin Your Journey
+          </button>
+          <a href="https://alathurpadidars.in/" target="_blank" rel="noopener noreferrer" className="text-[#10b981] hover:text-[#064e3b] font-semibold">
+            Visit Official Website
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </motion.div>
+    </section>
+  
+  </div>
+  
   );
 }
