@@ -457,3 +457,57 @@ const calculateMarksOnly = (data) => {
     });
     return { marksTotal: [marksTotal] };
 };
+
+
+
+
+export const LeaderboardSection = async (req, res) => {
+    try {
+        await db();
+
+        const { category } = req.query;
+        if (!category) {
+            return res.status(400).json({ error: "Category is required" });
+        }
+
+        // Step 1: Get all users in this category
+        const users = await User.find({ category });
+        const userIds = users.map(user => user._id);
+
+        // Step 2: Get all table data for these users
+        const allTableData = await UserTableData.find({ user: { $in: userIds } });
+
+        // Step 3: Build leaderboard by user
+        const sumArray = (arr) => arr.reduce((acc, val) => acc + val, 0);
+
+        const leaderboard = users.map(user => {
+            const userData = allTableData.filter(d => d.user.toString() === user._id.toString());
+
+            const totalMarks = userData.reduce((sum, d) => sum + sumArray(d.totalMarks), 0);
+
+            return {
+                _id: user._id,
+                name: user.username,
+                email: user.email,
+                totalTables: userData.length,
+                totalMarks
+            };
+        });
+        console.log("leaderboard",leaderboard);
+        // Sort by totalMarks descending
+        const sorted = leaderboard.sort((a, b) => b.totalMarks - a.totalMarks);
+
+        // Top 3
+        const topThree = sorted.slice(0, 3);
+
+        res.status(200).json({
+            topThree,
+            totalUsers: leaderboard.length,
+            allUsers: sorted
+        });
+
+    } catch (err) {
+        console.error("Leaderboard error:", err);
+        res.status(500).json({ error: "Server Error" });
+    }
+};

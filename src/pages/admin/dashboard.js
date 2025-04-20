@@ -163,6 +163,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import AdminSidebar from "@/components/AdminSidebar";
+import LeaderboardSection from "@/components/LeaderboardSection";
 import { EyeIcon } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -222,7 +223,8 @@ export default function AdminDashboard() {
 
     return (
 
-        <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-[#0f0f0f] flex flex-col md:flex-row">
+
             {/* Sidebar */}
             <AdminSidebar />
 
@@ -230,7 +232,7 @@ export default function AdminDashboard() {
             <main className="flex-1 p-4 md:p-8 lg:pl-72">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
                     <button
                         onClick={handleLogout}
                         className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
@@ -242,44 +244,49 @@ export default function AdminDashboard() {
                 {/* Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
                     {/* Create Section */}
-                    <div className="bg-white rounded-2xl shadow-xl p-12">
-                        <h2 className="text-2xl font-bold text-primary mb-6">Create New Section</h2>
-                        <form onSubmit={handleCreateSection} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-green-300 rounded-2xl p-12">
+                    <div className="bg-[#1a1a1a] rounded-3xl shadow-2xl p-8 sm:p-12 border border-gray-800">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 tracking-wide">
+                            Create New Section
+                        </h2>
 
+                        <form
+                            onSubmit={handleCreateSection}
+                            className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#222] p-6 sm:p-10 rounded-3xl border border-green-600"
+                        >
                             {/* Section No. */}
                             <div className="flex flex-col">
-                                <label className="block text-sm text-gray-700 mb-1">Section No.</label>
+                                <label className="text-sm font-medium text-gray-300 mb-2">Section No.</label>
                                 <input
                                     type="text"
                                     value={newSection.number}
                                     onChange={(e) => setNewSection({ ...newSection, number: e.target.value })}
                                     placeholder="No."
                                     required
-                                    className="w-full md:w-64 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-accent"
+                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 />
                             </div>
 
                             {/* Section Name */}
                             <div className="flex flex-col">
-                                <label className="block text-sm text-gray-700 mb-1">Section Name</label>
+                                <label className="text-sm font-medium text-gray-300 mb-2">Section Name</label>
                                 <input
                                     type="text"
                                     value={newSection.name}
                                     onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
                                     placeholder="Enter Section Name"
                                     required
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-accent"
+                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 />
                             </div>
 
                             {/* Category */}
                             <div className="flex flex-col">
-                                <label className="block text-sm text-gray-700 mb-1">Category</label>
+                                <label className="text-sm font-medium text-gray-300 mb-2">Category</label>
                                 <select
                                     value={newSection.sectionCategory}
                                     onChange={(e) => setNewSection({ ...newSection, sectionCategory: e.target.value })}
                                     required
-                                    className="w-full px-4 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-accent"
+                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 >
                                     <option value="">Select Category</option>
                                     <option value="below-20">Below 20</option>
@@ -289,12 +296,12 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Submit Button */}
-                            <div className="flex items-end justify-end">
+                            <div className="flex items-end justify-end md:col-span-2">
                                 <button
                                     type="submit"
-                                    className="bg-accent text-white px-6 py-2 rounded-xl hover:bg-accentDark transition"
+                                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full transition"
                                 >
-                                    Create Section
+                                    ➕ Create Section
                                 </button>
                             </div>
                         </form>
@@ -302,50 +309,43 @@ export default function AdminDashboard() {
 
 
 
+
                     {/* Metrics */}
-                    <div className="bg-white rounded-2xl shadow-xl p-6">
-                        <h2 className="text-2xl font-bold text-primary mb-6">User Metrics</h2>
-                        <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                            {[
-                                { title: 'Total Users', value: '120' },
-                                { title: 'Active Users', value: '89' },
-                                { title: 'Inactive Users', value: '31' },
-                                { title: 'Average Grade', value: 'B+' },
-                            ].map((item, i) => (
-                                <div key={i} className="bg-gray-100 p-4 rounded-xl shadow-sm text-center">
-                                    <h3 className="text-sm text-gray-600">{item.title}</h3>
-                                    <p className="text-2xl font-bold text-gray-900 mt-2">{item.value}</p>
-                                </div>
-                            ))}
-                        </div>
+                    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-2xl shadow-2xl p-6 border border-gray-800">
+
+                        <h2 className="text-xl text-white font-bold mb-4">Leaderboard</h2>
+                        <LeaderboardSection />
                     </div>
+
                 </div>
 
                 {/* Section Cards */}
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 p-4">
                     {sections.map((section) => (
                         <div
                             key={section._id}
-                            className="bg-white rounded-2xl shadow-md hover:shadow-xl hover:translate-y-1 transition-all p-5"
+                            className="bg-gradient-to-br from-[#1e1e1e] to-[#111111] rounded-3xl shadow-2xl border border-gray-800 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-green-800/30"
                         >
-                            <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-lg font-semibold text-gray-800">{section.name}</h3>
-                                <span className="inline-block px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-lg font-semibold text-white break-words">
+                                    {section.name}
+                                </h3>
+                                <span className="px-3 py-1 text-xs rounded-full bg-green-900 text-green-300 font-medium shadow-sm">
                                     {section.sectionCategory}
                                 </span>
                             </div>
 
-                            <div className="mt-4 flex justify-between items-center">
+                            <div className="mt-6 flex justify-between items-center">
                                 <button
                                     onClick={() => router.push(`/admin/view-section/${section._id}`)}
-                                    className="text-accent hover:underline text-sm flex items-center gap-1"
+                                    className="text-green-400 hover:text-green-300 hover:underline text-sm flex items-center gap-1"
                                 >
                                     <EyeIcon className="w-4 h-4" />
                                     View
                                 </button>
                                 <button
                                     onClick={() => handleDeleteSection(section._id)}
-                                    className="text-red-500 hover:text-red-700 text-xl"
+                                    className="text-red-400 hover:text-red-500 text-xl"
                                     title="Delete Section"
                                 >
                                     ❌
@@ -354,6 +354,8 @@ export default function AdminDashboard() {
                         </div>
                     ))}
                 </div>
+
+
             </main>
         </div>
 

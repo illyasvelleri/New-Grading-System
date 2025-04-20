@@ -332,7 +332,6 @@ export const saveUserTable = async (req) => {
 
         if (!existingTable) {
             const newTableData = {
-                _id: tableObjectId,
                 user: userObjectId,
                 section: sectionObjectId,
                 table: tableRefObjectId,
@@ -453,7 +452,7 @@ function getUserIdFromToken(token) {
 // export const calcSections = async (req, res) => {
 //     console.log("📥 Received Request Body:", req.body);
 //     console.log("📥 Received Query:", req.query);
-    
+
 //     try {
 //         await db();
 //         const { category } = req.query;
@@ -530,19 +529,19 @@ export const calcSections = async (req, res) => {
         const totalSections = adminSections.length;
 
         // Step 1: Find sections for the category
-const sections = await Section.find({ sectionCategory: category }).select('_id');
-const sectionIds = sections.map((s) => s._id);
+        const sections = await Section.find({ sectionCategory: category }).select('_id');
+        const sectionIds = sections.map((s) => s._id);
 
-// Step 2: Find tables linked to those sections
-const adminTable = await Table.find({ section: { $in: sectionIds } });
+        // Step 2: Find tables linked to those sections
+        const adminTable = await Table.find({ section: { $in: sectionIds } });
 
-// Step 3: Calculate total max marks from tables
-const totalMaxScore = adminTable.reduce((sum, table) => {
-    const tableMax = Array.isArray(table.maxMarks)
-        ? table.maxMarks.reduce((acc, val) => acc + (Number(val) || 0), 0)
-        : 0;
-    return sum + tableMax;
-}, 0);
+        // Step 3: Calculate total max marks from tables
+        const totalMaxScore = adminTable.reduce((sum, table) => {
+            const tableMax = Array.isArray(table.maxMarks)
+                ? table.maxMarks.reduce((acc, val) => acc + (Number(val) || 0), 0)
+                : 0;
+            return sum + tableMax;
+        }, 0);
 
 
         // ✅ Get user data (saved tables)

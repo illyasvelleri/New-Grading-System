@@ -417,38 +417,37 @@ export default function EditTable() {
                           {/* Radio */}
                           {column.type === 'radio' && (
                             <div className="flex items-center gap-4 mt-2">
-                            <input
-                              type="hidden"
-                              name={`data[${rowIndex}][columns][${columnIndex}][value]`}
-                              value="No"
-                            />
-                            {['Yes', 'No'].map((val) => (
-                              <label
-                                key={val}
-                                className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
-                                  ${
-                                    column.value === val
+                              <input
+                                type="hidden"
+                                name={`data[${rowIndex}][columns][${columnIndex}][value]`}
+                                value="No"
+                              />
+                              {['Yes', 'No'].map((val) => (
+                                <label
+                                  key={val}
+                                  className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
+                                  ${column.value === val
                                       ? 'bg-accent text-white border-accent shadow-md'
                                       : 'bg-white text-black border-gray-300 hover:border-accent'
-                                  } 
+                                    } 
                                   ${!column.isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              >
-                                <input
-                                  type="radio"
-                                  name={`data[${rowIndex}][columns][${columnIndex}][value]`}
-                                  value={val}
-                                  defaultChecked={column.value === val}
-                                  disabled={!column.isEditable}
-                                  onChange={(e) =>
-                                    handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
-                                  }
-                                  className="hidden"
-                                />
-                                <span className="text-sm font-medium">{val}</span>
-                              </label>
-                            ))}
-                          </div>
-                          
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`data[${rowIndex}][columns][${columnIndex}][value]`}
+                                    value={val}
+                                    defaultChecked={column.value === val}
+                                    disabled={!column.isEditable}
+                                    onChange={(e) =>
+                                      handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
+                                    }
+                                    className="hidden"
+                                  />
+                                  <span className="text-sm font-medium">{val}</span>
+                                </label>
+                              ))}
+                            </div>
+
                           )}
 
                           {/* Marks */}
@@ -470,17 +469,27 @@ export default function EditTable() {
                   ))}
                 </tbody>
 
-                <tfoot className="bg-gray-100 text-black text-sm font-medium">
+                <tfoot className="bg-white text-black text-base sm:text-lg font-light shadow-inner">
                   <tr>
-                    <td colSpan="100%" className="px-6 py-4">
-                      <div className="flex flex-col sm:flex-row justify-between gap-4">
-                        <div>Total Marks: <span className="text-accent">{table.totalMarks}</span></div>
-                        <div>Max Marks: <span className="text-accent">{table.maxMarks}</span></div>
-                        <div>Percentage: <span className="text-accent">{table.percentage}%</span></div>
+                    <td colSpan="100%" className="px-6 py-6">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
+                        <div>
+                          <span className="text-gray-500">Total Marks:</span>{" "}
+                          <span className="text-accent font-bold text-xl">{table.totalMarks}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Max Marks:</span>{" "}
+                          <span className="text-accent font-bold text-xl">{table.maxMarks}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Percentage:</span>{" "}
+                          <span className="text-accent font-bold text-xl">{table.percentage}%</span>
+                        </div>
                       </div>
                     </td>
                   </tr>
                 </tfoot>
+
               </table>
             </div>
 
@@ -489,8 +498,8 @@ export default function EditTable() {
                 type="submit"
                 disabled={!modifiedTables.has(tableIndex)}
                 className={`w-full sm:w-auto px-6 py-3 rounded-xl text-white font-bold transition ${modifiedTables.has(tableIndex)
-                    ? 'bg-gradient-to-r from-primary to-accent hover:brightness-110'
-                    : 'bg-gray-600 cursor-not-allowed opacity-50'
+                  ? 'bg-gradient-to-r from-primary to-accent hover:brightness-110'
+                  : 'bg-gray-600 cursor-not-allowed opacity-50'
                   }`}
               >
                 💾 Save Changes

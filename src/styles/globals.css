@@ -14,7 +14,23 @@
   scrollbar-width: none;     /* Firefox */
 }
 
-
+/* 👇 Custom spotlight background utility */
+@layer utilities {
+  .bg-spotlight-dark {
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(54, 187, 0, 0.25),
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(255, 231, 7, 0.15),
+        transparent 40%
+      ),
+      linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
+    color: white;
+  }
+}
 
 body {
   background: var(--background);
