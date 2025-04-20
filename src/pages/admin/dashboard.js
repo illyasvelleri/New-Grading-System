@@ -223,13 +223,13 @@ export default function AdminDashboard() {
 
     return (
 
-        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-[#0f0f0f] flex flex-col md:flex-row">
+        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-[#0f0f0f] flex flex-col md:flex-row px-6 pt-20 pb-32  md:px-12 lg:px-20 xl:px-32">
 
             {/* Sidebar */}
             <AdminSidebar />
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-8 lg:pl-72">
+            <main className="flex-1 p-4 md:p-8">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                     <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
@@ -242,16 +242,16 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                     {/* Create Section */}
-                    <div className="bg-[#1a1a1a] rounded-3xl shadow-2xl p-8 sm:p-12 border border-gray-800">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 tracking-wide">
+                    <div className="bg-[#1a1a1a] rounded-xl shadow-md p-6 sm:p-8 border border-gray-800">
+                        <h2 className="text-lg text-white font-bold mb-4 tracking-wide">
                             Create New Section
                         </h2>
 
                         <form
                             onSubmit={handleCreateSection}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#222] p-6 sm:p-10 rounded-3xl border border-green-600"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#222] p-4 sm:p-6 rounded-xl border border-green-600"
                         >
                             {/* Section No. */}
                             <div className="flex flex-col">
@@ -296,10 +296,10 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Submit Button */}
-                            <div className="flex items-end justify-end md:col-span-2">
+                            <div className="flex flex-col md:col-span-2 mt-4">
                                 <button
                                     type="submit"
-                                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full transition"
+                                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-full transition"
                                 >
                                     ➕ Create Section
                                 </button>
@@ -307,17 +307,13 @@ export default function AdminDashboard() {
                         </form>
                     </div>
 
-
-
-
                     {/* Metrics */}
-                    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-2xl shadow-2xl p-6 border border-gray-800">
-
-                        <h2 className="text-xl text-white font-bold mb-4">Leaderboard</h2>
+                    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-xl shadow-md p-4 border border-gray-800">
+                        <h2 className="text-lg text-white font-bold mb-4">Leaderboard</h2>
                         <LeaderboardSection />
                     </div>
-
                 </div>
+
 
                 {/* Section Cards */}
                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 p-4">
@@ -330,7 +326,7 @@ export default function AdminDashboard() {
                                 <h3 className="text-lg font-semibold text-white break-words">
                                     {section.name}
                                 </h3>
-                                <span className="px-3 py-1 text-xs rounded-full bg-green-900 text-green-300 font-medium shadow-sm">
+                                <span className="px-3 py-1 text-xs rounded-full bg-indigo-600 text-white font-medium shadow-sm">
                                     {section.sectionCategory}
                                 </span>
                             </div>

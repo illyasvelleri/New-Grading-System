@@ -139,7 +139,7 @@ export default function Dashboard() {
 
   return (
 
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 px-6 pt-20 pb-32  md:px-12 lg:px-20 xl:px-32">
+    <div className="min-h-screen flex flex-col md:flex-row bg-spotlight-dark px-6 pt-20 pb-32  md:px-12 lg:px-20 xl:px-32">
 
       {/* Sidebar */}
       <aside className="mb-8 md:mb-0 md:mr-12">
@@ -163,10 +163,6 @@ export default function Dashboard() {
           {/* Metrics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-2 gap-5">
             {[
-              // { label: 'Max Score', value: '100' },
-              // { label: 'Your Score', value: '82' },
-              // { label: 'Avg Score', value: '76%' },
-              // { label: 'Sections Completed', value: '6 of 10' }
               { label: "Max Score", value: maxScore },
               { label: "Your Score", value: userScore },
               { label: "Avg Score", value: `${avgScore}%` },

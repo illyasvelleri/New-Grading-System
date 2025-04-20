@@ -35,12 +35,12 @@ export default function UsersList() {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] p-6 py-24 bg-gray-50 min-h-screen">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">All Users</h1>
+                <h1 className="text-3xl font-bold text-white">All Users</h1>
                 <button
                     onClick={handleBack}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                 >
                     Back to Dashboard
                 </button>
@@ -55,11 +55,11 @@ export default function UsersList() {
                     {users.map((user) => (
                         <div
                             key={user._id}
-                            className="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 relative"
+                            className="p-6 bg-black rounded-2xl shadow hover:shadow-lg transition duration-300 relative"
                         >
-                            <h2 className="text-lg font-semibold text-gray-700">{user.username || "Un Named User"}</h2>
+                            <h2 className="text-lg font-semibold text-green-900">{user.username || "Un Named User"}</h2>
                             <p className="text-gray-500">Email: {user.email || "N/A"}</p>
-                            <p className="text-gray-500">ID: {user.category}</p>
+                            <p className="text-white">ID: {user.category}</p>
 
                             <button
                                 onClick={() => goToUserPage(user._id)}
