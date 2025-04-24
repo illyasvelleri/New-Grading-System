@@ -35,6 +35,11 @@ module.exports = {
         green500: '#48bb78', // Green-500 for hover states and borders
         green400: '#34d399', // Green-400 for accent text
       },
+      backgroundImage: {
+        'mint-fresh': 'linear-gradient(to bottom right, #f0fdf4, #ecfdf5)',
+        'calm-sky': 'linear-gradient(to bottom right, #f8fafc, #e0f2fe)',
+        'soft-morning': 'linear-gradient(to bottom right, #fff7ed, #fefce8)',
+      },
       
     },
     keyframes: {

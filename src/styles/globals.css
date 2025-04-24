@@ -14,6 +14,35 @@
   scrollbar-width: none;     /* Firefox */
 }
 
+
+/* Custom scrollbar */
+/* Modern horizontal scrollbar */
+.scrollbar-custom::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #0d6efd, #00c6ff); /* modern gradient */
+  border-radius: 9999px;
+  transition: background 0.3s ease;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, #0056d2, #0099cc); /* hover effect */
+}
+
+/* Firefox Support */
+.scrollbar-custom {
+ padding: 10px;
+  scrollbar-width: 50px;
+  scrollbar-color: #00660e transparent;
+}
+
+
 /* 👇 Custom spotlight background utility */
 @layer utilities {
   .bg-spotlight-dark {

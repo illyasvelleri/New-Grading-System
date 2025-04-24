@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function UserDetailPage() {
     const router = useRouter();
@@ -74,8 +75,10 @@ export default function UserDetailPage() {
 
 
     return (
-        <div className="bg-gradient-to-b from-slate-900 to-slate-800 min-h-screen text-white px-4 py-10 md:px-8 lg:px-16 xl:px-24">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-8 tracking-tight">
+        <div className="min-h-screen w-full bg-white text-gray-900 flex flex-col md:flex-row overflow-x-auto">
+            <AdminSidebar />
+            <div className="flex-1 p-6 md:p-10 bg-gray-50">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8 tracking-tight">
                 👤 User Details: <span className="text-accent">{tables[0]?.user?.username || "Unknown User"}</span>
             </h1>
 
@@ -86,7 +89,7 @@ export default function UserDetailPage() {
                         <li
                             key={section._id}
                             onClick={() => fetchTables(section._id)}
-                            className="cursor-pointer bg-base border border-primary/20 hover:shadow-xl hover:border-accent transition-all p-4 rounded-2xl text-white font-medium hover:bg-accent hover:text-white"
+                            className="cursor-pointer bg-base border border-primary/20 hover:shadow-xl hover:border-accent transition-all p-4 rounded-2xl text-gray-900 font-medium hover:bg-accent hover:text-white"
                         >
                             {section.name}
                         </li>
@@ -156,11 +159,16 @@ export default function UserDetailPage() {
                                                     <td className="px-6 py-4 font-semibold text-primary">{row.rowNumber}</td>
 
                                                     {row.columns.map((column, columnIndex) => (
-                                                        <td key={columnIndex} className="px-6 py-3 align-top">
+                                                        <td key={columnIndex} className={`border border-primary/20 font-semibold align-top p-0 ${['mark', 'max-mark'].includes(column.type) ? 'w-24' : ''
+                                                            }`}
+                                                            style={{
+                                                                backgroundColor: 'transparent',
+                                                                width: ['mark', 'max-mark'].includes(column.type) ? '80px' : 'auto',
+                                                            }}>
                                                             {/* Textarea */}
                                                             {column.type === 'text' && (
                                                                 <textarea
-                                                                    className="w-full no-scrollbar bg-white border border-primary/40 rounded-xl px-4 py-2 text-black shadow-sm focus:ring-2 focus:ring-primary resize-none"
+                                                                    className="w-full h-full block no-scrollbar bg-white border-none outline-none px-4 py-2 text-black resize-none"
                                                                     name={`data[${rowIndex}][columns][${columnIndex}][value]`}
                                                                     defaultValue={column.value}
                                                                     readOnly={true}
@@ -219,7 +227,7 @@ export default function UserDetailPage() {
                                                             {['mark', 'max-mark'].includes(column.type) && (
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full mt-2 bg-white border border-primary/40 rounded-xl px-4 py-2 text-black shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                                                    className="w-full mt-2 border-none outline-none px-4 py-2 text-black "
                                                                     name={`data[${rowIndex}][columns][${columnIndex}][value]`}
                                                                     defaultValue={column.value}
                                                                     disabled={false}
@@ -268,6 +276,6 @@ export default function UserDetailPage() {
                 </>
             )}
         </div>
-
+        </div>
     );
 }

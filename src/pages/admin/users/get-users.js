@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { ArrowRight } from "lucide-react"; // You can install lucide-react if needed
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function UsersList() {
     const [users, setUsers] = useState([]);
@@ -35,35 +36,32 @@ export default function UsersList() {
     };
 
     return (
-        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] p-6 py-24 bg-gray-50 min-h-screen">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-white">All Users</h1>
-                <button
-                    onClick={handleBack}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                    Back to Dashboard
-                </button>
+        <div className="min-h-screen w-full bg-white text-gray-900 flex flex-col md:flex-row overflow-x-auto">
+
+      <AdminSidebar />
+        <div className="flex-1 p-6 md:p-10bg-white p-6 py-24 min-h-screen">
+            <div className="flex justify-between items-center mb-10">
+                <h1 className="text-4xl font-bold text-gray-900">All Users</h1>
             </div>
 
             {loading ? (
-                <p className="text-gray-600">Loading users...</p>
+                <p className="text-gray-600 text-center">Loading users...</p>
             ) : users.length === 0 ? (
-                <p className="text-gray-600">No users found.</p>
+                <p className="text-gray-600 text-center">No users found.</p>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {users.map((user) => (
                         <div
                             key={user._id}
-                            className="p-6 bg-black rounded-2xl shadow hover:shadow-lg transition duration-300 relative"
+                            className="relative p-6 bg-white text-gray-900 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
                         >
-                            <h2 className="text-lg font-semibold text-green-900">{user.username || "Un Named User"}</h2>
-                            <p className="text-gray-500">Email: {user.email || "N/A"}</p>
-                            <p className="text-white">ID: {user.category}</p>
+                            <h2 className="text-xl font-semibold text-green-800">{user.username || "Unnamed User"}</h2>
+                            <p className="text-gray-600 mt-2">Email: {user.email || "N/A"}</p>
+                            <p className="text-gray-700 mt-1">Category: {user.category || "N/A"}</p>
 
                             <button
                                 onClick={() => goToUserPage(user._id)}
-                                className="absolute top-4 right-4 text-blue-600 hover:text-blue-800"
+                                className="absolute top-4 right-4 text-blue-600 hover:text-blue-800 transition duration-300"
                                 title="View Details"
                             >
                                 <ArrowRight />
@@ -72,6 +70,9 @@ export default function UsersList() {
                     ))}
                 </div>
             )}
+        </div>
+
+
         </div>
     );
 }

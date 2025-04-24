@@ -159,23 +159,22 @@
 
 // pages/admin/dashboard.js
 // pages/admin/dashboard.js
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import AdminSidebar from "@/components/AdminSidebar";
 import LeaderboardSection from "@/components/LeaderboardSection";
-import { EyeIcon } from 'lucide-react'
+
 
 export default function AdminDashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [admin, setAdmin] = useState(null);
-    const [sections, setSections] = useState([]);
     const [newSection, setNewSection] = useState({ number: "", name: "", sectionCategory: "" });
     const router = useRouter();
 
     useEffect(() => {
         fetchAdmin();
-        fetchSections();
     }, []);
 
     const fetchAdmin = async () => {
@@ -184,15 +183,6 @@ export default function AdminDashboard() {
             setAdmin(res.data);
         } catch (error) {
             router.push("/admin/login");
-        }
-    };
-
-    const fetchSections = async () => {
-        try {
-            const res = await axios.get("/api/admin/sections");
-            setSections(res.data.sections || []);
-        } catch (error) {
-            console.error("Failed to fetch sections:", error);
         }
     };
 
@@ -212,81 +202,68 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleDeleteSection = async (id) => {
-        try {
-            await axios.delete(`/api/admin/sections/delete?id=${id}`);
-            fetchSections();
-        } catch (error) {
-            console.error("Failed to delete section", error);
-        }
-    };
-
     return (
-
-        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-[#0f0f0f] flex flex-col md:flex-row px-6 pt-20 pb-32  md:px-12 lg:px-20 xl:px-32">
+        <div className="min-h-screen w-full bg-white text-gray-900 flex flex-col md:flex-row overflow-x-auto">
 
             {/* Sidebar */}
             <AdminSidebar />
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-8">
+            <main className="flex-1 p-6 md:p-10 bg-gray-50">
+
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                    <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
+                <div className="flex justify-between items-center mb-10 flex-wrap gap-4">
+                    <h1 className="text-3xl font-bold text-gray-800">🧠 Admin Dashboard</h1>
                     <button
                         onClick={handleLogout}
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-transform transform hover:scale-105 hidden lg:block"
                     >
                         Logout
                     </button>
                 </div>
 
                 {/* Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                    {/* Create Section */}
-                    <div className="bg-[#1a1a1a] rounded-xl shadow-md p-6 sm:p-8 border border-gray-800">
-                        <h2 className="text-lg text-white font-bold mb-4 tracking-wide">
-                            Create New Section
-                        </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                        <form
-                            onSubmit={handleCreateSection}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#222] p-4 sm:p-6 rounded-xl border border-green-600"
-                        >
-                            {/* Section No. */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-300 mb-2">Section No.</label>
+                    {/* Create Section Card */}
+                    <div className="bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-800">
+                        <h2 className="text-xl font-semibold text-center text-white mb-6">➕ Create Section</h2>
+
+                        <form onSubmit={handleCreateSection} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Section No */}
+                            <div>
+                                <label className="text-sm font-medium text-gray-300">Section No.</label>
                                 <input
                                     type="text"
                                     value={newSection.number}
                                     onChange={(e) => setNewSection({ ...newSection, number: e.target.value })}
-                                    placeholder="No."
+                                    className="mt-1 w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm"
+                                    placeholder="Enter Section No."
                                     required
-                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 />
                             </div>
 
                             {/* Section Name */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-300 mb-2">Section Name</label>
+                            <div>
+                                <label className="text-sm font-medium text-gray-300">Section Name</label>
                                 <input
                                     type="text"
                                     value={newSection.name}
                                     onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+                                    className="mt-1 w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm"
                                     placeholder="Enter Section Name"
                                     required
-                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 />
                             </div>
 
                             {/* Category */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-300 mb-2">Category</label>
+                            <div>
+                                <label className="text-sm font-medium text-gray-300">Category</label>
                                 <select
                                     value={newSection.sectionCategory}
                                     onChange={(e) => setNewSection({ ...newSection, sectionCategory: e.target.value })}
+                                    className="mt-1 w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm"
                                     required
-                                    className="px-4 py-2 rounded-full border border-gray-600 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                                 >
                                     <option value="">Select Category</option>
                                     <option value="below-20">Below 20</option>
@@ -295,63 +272,28 @@ export default function AdminDashboard() {
                                 </select>
                             </div>
 
-                            {/* Submit Button */}
-                            <div className="flex flex-col md:col-span-2 mt-4">
+                            {/* Submit */}
+                            <div className="flex items-end">
                                 <button
                                     type="submit"
-                                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-full transition"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-semibold shadow transition-transform transform hover:scale-105"
                                 >
-                                    ➕ Create Section
+                                    Create Section
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    {/* Metrics */}
-                    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-xl shadow-md p-4 border border-gray-800">
-                        <h2 className="text-lg text-white font-bold mb-4">Leaderboard</h2>
+
+                    {/* Leaderboard */}
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 min-h-[300px]">
                         <LeaderboardSection />
                     </div>
+
+                    <div >
+                        {/*progress in here....*/}
+                    </div>
                 </div>
-
-
-                {/* Section Cards */}
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 p-4">
-                    {sections.map((section) => (
-                        <div
-                            key={section._id}
-                            className="bg-gradient-to-br from-[#1e1e1e] to-[#111111] rounded-3xl shadow-2xl border border-gray-800 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-green-800/30"
-                        >
-                            <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-lg font-semibold text-white break-words">
-                                    {section.name}
-                                </h3>
-                                <span className="px-3 py-1 text-xs rounded-full bg-indigo-600 text-white font-medium shadow-sm">
-                                    {section.sectionCategory}
-                                </span>
-                            </div>
-
-                            <div className="mt-6 flex justify-between items-center">
-                                <button
-                                    onClick={() => router.push(`/admin/view-section/${section._id}`)}
-                                    className="text-green-400 hover:text-green-300 hover:underline text-sm flex items-center gap-1"
-                                >
-                                    <EyeIcon className="w-4 h-4" />
-                                    View
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteSection(section._id)}
-                                    className="text-red-400 hover:text-red-500 text-xl"
-                                    title="Delete Section"
-                                >
-                                    ❌
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-
             </main>
         </div>
 

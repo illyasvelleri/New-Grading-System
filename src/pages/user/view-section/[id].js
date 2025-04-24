@@ -372,11 +372,11 @@ export default function EditTable() {
             </div>
 
             {/* Table Content */}
-            <div className="overflow-x-auto rounded-xl border border-primary/20 shadow-lg">
-              <table className="min-w-full bg-white text-black divide-y divide-primary/30 text-sm rounded-xl overflow-hidden">
+            <div className="w-full overflow-x-auto scrollbar-custom rounded-xl border border-primary/20 shadow-lg">
+              <table className="w-full min-w-[900px] bg-white text-black divide-y divide-primary/30 text-sm rounded-xl overflow-hidden">
                 <thead className="bg-accent text-white text-bold uppercase font-semibold text-xs tracking-wide">
                   <tr className="text-lg">
-                    <th className="px-6 py-4 text-left">Row</th>
+                    <th className="px-6 py-4 text-left w-24">Row</th>
                     {table.columns.map((column, columnIndex) => (
                       <th key={columnIndex} className="px-6 py-6 text-center">
                         {column.name}
@@ -384,18 +384,23 @@ export default function EditTable() {
                     ))}
                   </tr>
                 </thead>
-
                 <tbody className="divide-y divide-primary/10">
                   {table.data.map((row, rowIndex) => (
                     <tr key={rowIndex} className="hover:bg-gray-50 transition-all duration-150">
-                      <td className="px-6 py-4 font-semibold text-primary">{row.rowNumber}</td>
+                      <td className="border border-primary/20 font-semibold text-primary ps-4 min-w-[100px]">{row.rowNumber}</td>
 
                       {row.columns.map((column, columnIndex) => (
-                        <td key={columnIndex} className="px-6 py-3 align-top">
+                        <td key={columnIndex} className={`border border-primary/20 font-semibold align-top p-0 ${['mark', 'max-mark'].includes(column.type) ? 'w-24' : ''
+                          }`}
+                          style={{
+                            backgroundColor: 'transparent',
+                            width: ['mark', 'max-mark'].includes(column.type) ? '80px' : 'auto',
+                          }}
+                        >
                           {/* Textarea */}
                           {column.type === 'text' && (
                             <textarea
-                              className="w-full no-scrollbar bg-white border border-primary/40 outline-none rounded-xl px-4 py-2 text-black shadow-sm focus:ring-2 focus:ring-green-800 resize-none"
+                              className="w-full h-full block no-scrollbar border-none outline-none px-4 py-2 text-black resize-none"
                               name={`data[${rowIndex}][columns][${columnIndex}][value]`}
                               defaultValue={column.value}
                               readOnly={!column.isEditable}
@@ -416,45 +421,47 @@ export default function EditTable() {
 
                           {/* Radio */}
                           {column.type === 'radio' && (
-                            <div className="flex items-center gap-4 mt-2">
-                              <input
-                                type="hidden"
-                                name={`data[${rowIndex}][columns][${columnIndex}][value]`}
-                                value="No"
-                              />
-                              {['Yes', 'No'].map((val) => (
-                                <label
-                                  key={val}
-                                  className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
-                                  ${column.value === val
-                                      ? 'bg-accent text-white border-accent shadow-md'
-                                      : 'bg-white text-black border-gray-300 hover:border-accent'
-                                    } 
-                                  ${!column.isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`data[${rowIndex}][columns][${columnIndex}][value]`}
-                                    value={val}
-                                    defaultChecked={column.value === val}
-                                    disabled={!column.isEditable}
-                                    onChange={(e) =>
-                                      handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
-                                    }
-                                    className="hidden"
-                                  />
-                                  <span className="text-sm font-medium">{val}</span>
-                                </label>
-                              ))}
+                            <div className="flex justify-center items-center h-full">
+                              <div className="flex items-center gap-4 mt-2">
+                                <input
+                                  type="hidden"
+                                  name={`data[${rowIndex}][columns][${columnIndex}][value]`}
+                                  value="No"
+                                />
+                                {['Yes', 'No'].map((val) => (
+                                  <label
+                                    key={val}
+                                    className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
+            ${column.value === val
+                                        ? 'bg-accent text-white border-accent shadow-md'
+                                        : 'bg-white text-black border-gray-300 hover:border-accent'
+                                      } 
+            ${!column.isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`data[${rowIndex}][columns][${columnIndex}][value]`}
+                                      value={val}
+                                      defaultChecked={column.value === val}
+                                      disabled={!column.isEditable}
+                                      onChange={(e) =>
+                                        handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
+                                      }
+                                      className="hidden"
+                                    />
+                                    <span className="text-sm font-medium">{val}</span>
+                                  </label>
+                                ))}
+                              </div>
                             </div>
-
                           )}
+
 
                           {/* Marks */}
                           {['mark', 'max-mark'].includes(column.type) && (
                             <input
                               type="number"
-                              className="w-24 sm:w-20 mt-2 bg-white border border-primary/40 rounded-xl px-4 py-2 text-black shadow-sm focus:ring-2 focus:ring-primary focus:outline-none text-center"
+                              className="w-full h-full block border-none px-4 py-2 text-black focus:outline-none text-center"
                               name={`data[${rowIndex}][columns][${columnIndex}][value]`}
                               defaultValue={column.value}
                               readOnly={!column.isEditable}
