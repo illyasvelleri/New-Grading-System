@@ -165,6 +165,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import AdminSidebar from "@/components/AdminSidebar";
 import LeaderboardSection from "@/components/LeaderboardSection";
+import ProgressBar from "@/components/ProgressBar";
 
 
 export default function AdminDashboard() {
@@ -286,13 +287,12 @@ export default function AdminDashboard() {
 
 
                     {/* Leaderboard */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 min-h-[300px]">
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-200">
                         <LeaderboardSection />
                     </div>
-
-                    <div >
-                        {/*progress in here....*/}
-                    </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+                    <ProgressBar />
                 </div>
             </main>
         </div>

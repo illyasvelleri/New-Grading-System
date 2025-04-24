@@ -7,7 +7,7 @@ import { FaHome, FaUser, FaCog } from 'react-icons/fa';
 import { PowerIcon } from '@heroicons/react/24/outline';
 
 const navigation = [
-  { name: 'Home', href: '/', icon: FaHome },
+  { name: 'Home', href: '/user/dashboard', icon: FaHome },
   { name: 'Profile', href: '/profile', icon: FaUser },
   { name: 'Settings', href: '/settings', icon: FaCog },
 ];
