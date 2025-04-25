@@ -428,6 +428,8 @@ export const updateMark = async (req) => {
     const { marksTotal } = calculateMarksOnly(userTableData.data);
     userTableData.totalMarks = marksTotal;
 
+
+
     // 🧮 Calculate percentage if maxMarks exist
     const max = userTableData.maxMarks?.[0] || 0;
     const percentage = max > 0 ? ((marksTotal[0] / max) * 100).toFixed(2) : 0;
@@ -493,7 +495,7 @@ export const LeaderboardSection = async (req, res) => {
                 totalMarks
             };
         });
-        console.log("leaderboard",leaderboard);
+        console.log("leaderboard", leaderboard);
         // Sort by totalMarks descending
         const sorted = leaderboard.sort((a, b) => b.totalMarks - a.totalMarks);
 
