@@ -245,7 +245,7 @@ export default function Dashboard() {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-tr from-white via-gray-50 to-blue-50 text-sm text-gray-800 dark:text-white transition-colors duration-300 pb-24">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-tr from-white via-gray-50 to-blue-50 text-sm text-gray-800 dark:text-white transition-colors duration-300">
 
       {/* Header */}
       <aside>
@@ -253,7 +253,7 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-5 sm:p-8 md:p-10 space-y-10">
+      <main className="flex-1 p-5 sm:p-8 md:p-10 space-y-10 mb-24">
 
         {/* Welcome Section */}
         <section>
