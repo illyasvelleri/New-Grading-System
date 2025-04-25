@@ -22,7 +22,7 @@ export const loginAdmin = async (req, res) => {
         }
 
         // Generate JWT token
-        const token = jwt.sign({ email, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ email, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         // Set token in HTTP-only cookie
         res.setHeader(
@@ -42,21 +42,21 @@ export const loginAdmin = async (req, res) => {
     }
 };
 
-// Admin Logout
-export const logoutAdmin = (req, res) => {
-    res.setHeader(
-        "Set-Cookie",
-        cookie.serialize("authToken", "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-            expires: new Date(0),
-        })
-    );
+// // Admin Logout
+// export const logoutAdmin = (req, res) => {
+//     res.setHeader(
+//         "Set-Cookie",
+//         cookie.serialize("authToken", "", {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === "production",
+//             sameSite: "strict",
+//             path: "/",
+//             expires: new Date(0),
+//         })
+//     );
 
-    res.status(200).json({ message: "Logout Successful" });
-};
+//     res.status(200).json({ message: "Logout Successful" });
+// };
 
 
 export const listSection = async (req, res) => {

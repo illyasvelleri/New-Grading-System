@@ -18,6 +18,23 @@ const UserHeader = () => {
 
   const isActive = (href) => pathname === href;
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/user/logout", {
+        method: "POST",
+        credentials: "include", // Send cookies
+      });
+
+      if (!response.ok) {
+        throw new Error(`Logout failed: ${response.statusText}`);
+      }
+
+      const router = useRouter();
+      router.push("/user/login"); // Redirect to user login page
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <>
@@ -33,8 +50,8 @@ const UserHeader = () => {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(item.href)
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-emerald-50 text-emerald-600"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <item.icon className="h-5 w-5" />
@@ -82,7 +99,7 @@ const UserHeader = () => {
 
         {/* Logout */}
         <button
-          onClick={() => router.push("/user/login")}
+          onClick={handleLogout}
           className="flex flex-col items-center text-xs text-red-400 hover:text-red-300 transition-all duration-300 ease-in-out transform hover:scale-110"
         >
           <PowerIcon className="h-6 w-6 mb-1" />

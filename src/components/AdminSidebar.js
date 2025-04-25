@@ -23,6 +23,22 @@ export default function Sidebar() {
   const router = useRouter();
   const isActive = (path) => router.pathname === path;
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        credentials: "include", // important to send cookies
+      });
+
+      // Optional: clear client-side state (e.g. Redux, Context, etc.)
+
+      // Redirect to login
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   return (
     <>
       {/* Modern Mobile Toggle Button */}
@@ -70,8 +86,8 @@ export default function Sidebar() {
                       key={item.name}
                       href={item.href}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(item.href)
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "text-gray-600 hover:bg-gray-100"
+                        ? "bg-emerald-50 text-emerald-600"
+                        : "text-gray-600 hover:bg-gray-100"
                         }`}
                     >
                       <item.icon className="h-5 w-5" />
@@ -95,7 +111,7 @@ export default function Sidebar() {
       </Transition.Root>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 flex-col h-screen bg-white border-r p-6 shadow-sm">
+      <aside className="sticky top-0 z-50 hidden lg:flex lg:w-64 flex-col h-screen bg-white border-r p-6 shadow-sm">
         {/* Header */}
         <div className="text-xl font-bold text-gray-800 mb-6">Admin Panel</div>
 
@@ -106,8 +122,8 @@ export default function Sidebar() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(item.href)
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-emerald-50 text-emerald-600"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <item.icon className="h-5 w-5" />
@@ -119,7 +135,7 @@ export default function Sidebar() {
         {/* Logout */}
         <div className="pt-4 border-t mt-auto">
           <button
-            onClick={() => router.push("/user/login")}
+            onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 text-sm text-red-500 hover:bg-red-100 rounded-lg"
           >
             <PowerIcon className="h-5 w-5" />
