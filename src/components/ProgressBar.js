@@ -54,7 +54,7 @@ const ProgressBar = () => {
             </div>
             {/* All Users Completion Bars */}
             <div className="mt-10">
-                <h2 className="text-lg font-semibold text-gray-800 mb-6">User Progress</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-6">All User Progress</h2>
 
                 {/* Wrapper to handle horizontal scroll */}
                 <div className="overflow-x-auto scrollbar-custom">
