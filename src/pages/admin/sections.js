@@ -6,6 +6,7 @@ import { EyeIcon } from 'lucide-react';
 
 export default function Sections() {
     const [admin, setAdmin] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [sections, setSections] = useState([]);
     const [filteredSections, setFilteredSections] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -40,8 +41,11 @@ export default function Sections() {
             setSections(res.data.sections || []);
         } catch (error) {
             console.error("Failed to fetch sections:", error);
+        } finally {
+            setLoading(false);
         }
     };
+
 
     const handleDeleteSection = async (id) => {
         const confirmDelete = await confirmDeletePrompt();
@@ -111,40 +115,48 @@ export default function Sections() {
                 </div>
 
                 {/* Section Cards */}
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                    {filteredSections.map((section) => (
-                        <div
-                            key={section._id}
-                            className="bg-white rounded-2xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-all duration-300"
-                        >
-                            <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-base font-semibold text-gray-900 break-words leading-tight">
-                                    {section.name}
-                                </h3>
-                                <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-semibold">
-                                    {section.sectionCategory}
-                                </span>
-                            </div>
+                {/* Section Cards */}
+                {loading ? (
+                    <div className="text-center text-gray-500">Loading sections...</div>
+                ) : filteredSections.length === 0 ? (
+                    <div className="text-center text-gray-500 w-full py-10">No section found</div>
+                ) : (
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                        {filteredSections.map((section) => (
+                            <div
+                                key={section._id}
+                                className="bg-white rounded-2xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-all duration-300"
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-base font-semibold text-gray-900 break-words leading-tight">
+                                        {section.name}
+                                    </h3>
+                                    <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-semibold">
+                                        {section.sectionCategory}
+                                    </span>
+                                </div>
 
-                            <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-4">
-                                <button
-                                    onClick={() => router.push(`/admin/view-section/${section._id}`)}
-                                    className="text-green-600 hover:text-green-700 text-xs font-medium flex items-center gap-1"
-                                >
-                                    <EyeIcon className="w-4 h-4" />
-                                    View
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteSection(section._id)}
-                                    className="text-red-500 hover:text-red-600 text-sm"
-                                    title="Delete Section"
-                                >
-                                    ❌
-                                </button>
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-4">
+                                    <button
+                                        onClick={() => router.push(`/admin/view-section/${section._id}`)}
+                                        className="text-green-600 hover:text-green-700 text-xs font-medium flex items-center gap-1"
+                                    >
+                                        <EyeIcon className="w-4 h-4" />
+                                        View
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteSection(section._id)}
+                                        className="text-red-500 hover:text-red-600 text-sm"
+                                        title="Delete Section"
+                                    >
+                                        ❌
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
+
             </main>
         </div>
 

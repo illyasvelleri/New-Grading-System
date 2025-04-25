@@ -230,7 +230,7 @@ export default function UserDetailPage() {
                                                                     className="w-full mt-2 border-none outline-none px-4 py-2 text-black "
                                                                     name={`data[${rowIndex}][columns][${columnIndex}][value]`}
                                                                     defaultValue={column.value}
-                                                                    disabled={false}
+                                                                    disabled={column.type !== 'mark'}
                                                                     onChange={(e) =>
                                                                         handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
                                                                     }

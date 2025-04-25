@@ -156,7 +156,6 @@ import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import UserSidebar from "@/components/UserSidebar";
 import UserHeader from '@/components/UserHeader';
 
 function CountUp({ end }) {

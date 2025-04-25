@@ -196,7 +196,6 @@ export default function AdminDashboard() {
         e.preventDefault();
         try {
             await axios.post("/api/admin/sections/create", newSection);
-            fetchSections();
             setNewSection({ number: "", name: "", sectionCategory: "" });
         } catch (error) {
             console.error("Failed to create section", error);

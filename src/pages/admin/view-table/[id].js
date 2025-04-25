@@ -278,6 +278,19 @@ export default function EditTable() {
     return (
         <div className="bg-gradient-slate min-h-screen px-4 py-10 md:px-8 lg:px-16 xl:px-24">
             <h1 className="text-3xl font-semibold text-center text-white mb-6">Edit : {table.tableName}</h1>
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg mb-6 flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 flex-shrink-0 mt-1 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M12 20h.01M12 4.25c4.25 0 7.75 3.5 7.75 7.75S16.25 19.75 12 19.75 4.25 16.25 4.25 12 7.75 4.25 12 4.25z" />
+                </svg>
+                <div>
+                    <p className="font-semibold text-base">⚠️ Important!</p>
+                    <p className="text-sm mt-1">
+                        Remember, <span className="font-bold">you must fill in the Max Marks now</span>.
+                        It will not be possible to update them later.
+                    </p>
+                </div>
+            </div>
+
             <form onSubmit={handleSave} className="space-y-6">
                 {/* Table Description */}
                 <div>
@@ -355,10 +368,10 @@ export default function EditTable() {
                                                         value={col.value}
                                                         ref={(el) => {
                                                             if (el) {
-                                                              el.style.height = 'auto';
-                                                              el.style.height = el.scrollHeight + 'px';
+                                                                el.style.height = 'auto';
+                                                                el.style.height = el.scrollHeight + 'px';
                                                             }
-                                                          }}
+                                                        }}
                                                         onChange={(e) => handleInputChange(rowIdx, colIdx, e.target.value)}
                                                     />
                                                 )}
@@ -366,13 +379,12 @@ export default function EditTable() {
                                                     <div className="flex items-center gap-4 mt-2">
                                                         {["Yes", "No"].map((opt) => (
                                                             <label key={opt}
-                                                            
-                                                            className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
-                                                                ${
-                                                                  col.value === opt
-                                                                    ? 'bg-accent text-white border-accent shadow-md'
-                                                                    : 'bg-white text-black border-gray-300 hover:border-accent'
-                                                                } 
+
+                                                                className={`flex items-center px-4 py-2 rounded-full border transition-all cursor-pointer 
+                                                                ${col.value === opt
+                                                                        ? 'bg-accent text-white border-accent shadow-md'
+                                                                        : 'bg-white text-black border-gray-300 hover:border-accent'
+                                                                    } 
                                                                 ${!col.isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                                                 <input
                                                                     type="radio"
@@ -392,6 +404,7 @@ export default function EditTable() {
                                                         type="number"
                                                         className="w-full p-1 border rounded"
                                                         value={col.value}
+                                                        disabled={col.type !== 'max-mark'}
                                                         onChange={(e) => handleInputChange(rowIdx, colIdx, e.target.value)}
                                                     />
                                                 )}
