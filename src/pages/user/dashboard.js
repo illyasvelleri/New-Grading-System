@@ -157,6 +157,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import UserHeader from '@/components/UserHeader';
+import ProgressBar from "@/components/ProgressBar";
 
 function CountUp({ end }) {
   const [count, setCount] = useState(0);
@@ -333,6 +334,10 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+          <ProgressBar />
+        </div>
       </main>
     </div>
 
