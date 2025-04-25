@@ -22,7 +22,7 @@ const UserHeader = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 flex-col h-screen bg-white border-r p-6 shadow-sm">
+      <aside className="sticky top-0 z-50 hidden lg:flex lg:w-64 flex-col h-screen bg-white border-r p-6 shadow-sm">
         {/* Header */}
         <div className="text-xl font-bold text-gray-800 mb-6">User Panel</div>
 
