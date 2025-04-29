@@ -111,52 +111,68 @@ export default function ViewSectionPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 flex flex-col md:flex-row pb-20 text-sm text-gray-900 font-inter">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-white flex flex-col lg:flex-row text-xs sm:text-sm text-gray-900 font-inter">
             <AdminSidebar />
 
-            <div className="flex-1 p-4 md:p-6 space-y-10">
+            <div className="flex-1 p-4 sm:p-6 md:p-8 mx-auto w-full space-y-8">
                 {/* Section Header */}
-                <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-200">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{section.name}</h2>
-                    <p className="text-sm text-gray-500 mt-1">Category: {section.sectionCategory}</p>
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-2xl">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+                        {section.name}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-2 capitalize">
+                        Category: {section.sectionCategory}
+                    </p>
 
-                    {/* Create Table */}
-                    <h3 className="mt-10 text-xl font-semibold text-gray-800">Create Table</h3>
-                    <form className="mt-5 space-y-6" onSubmit={handleCreateTable}>
+                    {/* Create Table Form */}
+                    <h3 className="mt-8 text-lg sm:text-xl font-semibold text-gray-800">Create Table</h3>
+                    <form className="mt-6 space-y-6" onSubmit={handleCreateTable}>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="flex flex-col">
-                                <label>Table Name</label>
+                                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2" htmlFor="table-name">
+                                    Table Name
+                                </label>
                                 <input
+                                    id="table-name"
                                     type="text"
-                                    placeholder="Table Name"
+                                    placeholder="Enter table name"
                                     value={tableName}
                                     onChange={(e) => setTableName(e.target.value)}
-                                    className="p-3 border rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
+                                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-gray-800 text-sm hover:bg-gray-100 transition-all duration-200"
                                     required
+                                    aria-label="Table name"
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label>Rows</label>
+                                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2" htmlFor="rows-count">
+                                    Rows
+                                </label>
                                 <input
+                                    id="rows-count"
                                     type="number"
-                                    placeholder="Rows"
+                                    placeholder="Number of rows"
                                     min="2"
                                     value={rowsCount}
                                     onChange={(e) => setRowsCount(Number(e.target.value))}
-                                    className="p-3 border rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
+                                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-gray-800 text-sm hover:bg-gray-100 transition-all duration-200"
                                     required
+                                    aria-label="Number of rows"
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label>Columns</label>
+                                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2" htmlFor="columns-count">
+                                    Columns
+                                </label>
                                 <input
+                                    id="columns-count"
                                     type="number"
-                                    placeholder="Columns"
+                                    placeholder="Number of columns"
                                     min="2"
                                     value={columns}
                                     onChange={(e) => setColumns(Number(e.target.value))}
-                                    className="p-3 border rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
+                                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-gray-800 text-sm hover:bg-gray-100 transition-all duration-200"
                                     required
+                                    aria-label="Number of columns"
                                 />
                             </div>
                         </div>
@@ -164,18 +180,22 @@ export default function ViewSectionPage() {
                         {/* Column Inputs */}
                         <div className="space-y-4">
                             {columnData.map((col, index) => (
-                                <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50 p-4 border rounded-xl shadow-sm">
+                                <div
+                                    key={index}
+                                    className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm"
+                                >
                                     <input
                                         type="text"
-                                        placeholder="Column Name"
+                                        placeholder={`Column ${index + 1} name`}
                                         value={col.name}
                                         onChange={(e) => {
                                             const newColumns = [...columnData];
                                             newColumns[index].name = e.target.value;
                                             setColumnDetails(newColumns);
                                         }}
-                                        className="flex-1 p-2 border rounded-lg w-full focus:outline-none"
+                                        className="flex-1 p-3 bg-white border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800 text-sm hover:bg-gray-100 transition-all duration-200"
                                         required
+                                        aria-label={`Column ${index + 1} name`}
                                     />
                                     <select
                                         value={col.type}
@@ -184,14 +204,15 @@ export default function ViewSectionPage() {
                                             newColumns[index].type = e.target.value;
                                             setColumnDetails(newColumns);
                                         }}
-                                        className="p-2 border rounded-lg focus:outline-none"
+                                        className="p-3 bg-white border border-gray-200 rounded-xl w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800 text-sm hover:bg-gray-100 transition-all duration-200"
+                                        aria-label={`Column ${index + 1} type`}
                                     >
                                         <option value="text">Text</option>
                                         <option value="radio">Radio</option>
                                         <option value="mark">Mark</option>
                                         <option value="max-mark">Max Mark</option>
                                     </select>
-                                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                                    <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap">
                                         <input
                                             type="checkbox"
                                             checked={col.allowUserInput}
@@ -200,7 +221,8 @@ export default function ViewSectionPage() {
                                                 newColumns[index].allowUserInput = e.target.checked;
                                                 setColumnDetails(newColumns);
                                             }}
-                                            className="h-5 w-5 text-green-600 border-gray-300 rounded"
+                                            className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                            aria-label={`Allow user input for column ${index + 1}`}
                                         />
                                         Allow Input
                                     </label>
@@ -211,48 +233,51 @@ export default function ViewSectionPage() {
                         {/* Create Button */}
                         <button
                             type="submit"
-                            className="w-full bg-green-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-green-700 transition-all duration-200"
+                            className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-xl shadow-md hover:bg-green-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
+                            aria-label="Create table"
                         >
-                            ➕ Create Table
+                            <span>➕ Create Table</span>
                         </button>
                     </form>
                 </div>
 
                 {/* Created Tables */}
-                <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-200">
-                    <h3 className="text-xl font-semibold text-gray-800">Created Tables</h3>
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-2xl">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800">Created Tables</h3>
                     {tables.length === 0 ? (
-                        <p className="text-gray-500 mt-3">No tables found.</p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-3">No tables found.</p>
                     ) : (
-                        <div className="overflow-x-auto mt-5">
-                            <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                <thead className="bg-gray-100 text-gray-700 font-semibold">
+                        <div className="overflow-x-auto mt-6">
+                            <table className="w-full text-xs sm:text-sm border border-gray-100 rounded-xl shadow-sm">
+                                <thead className="bg-gray-50 text-gray-700 font-semibold">
                                     <tr>
-                                        <th className="p-3 border">Table Name</th>
-                                        <th className="p-3 border">Rows</th>
-                                        <th className="p-3 border">Columns</th>
-                                        <th className="p-3 border">Actions</th>
+                                        <th className="p-3 sm:p-4 border-b text-left">Table Name</th>
+                                        <th className="p-3 sm:p-4 border-b text-center">Rows</th>
+                                        <th className="p-3 sm:p-4 border-b text-center">Columns</th>
+                                        <th className="p-3 sm:p-4 border-b text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {tables.map((table) => (
-                                        <tr key={table._id} className="text-center hover:bg-gray-50 transition">
-                                            <td className="p-3 border">{table.tableName}</td>
-                                            <td className="p-3 border">{table.rowsCount}</td>
-                                            <td className="p-3 border">{table.columns.length}</td>
-                                            <td className="p-3 border">
+                                        <tr key={table._id} className="text-center hover:bg-gray-50 transition-all duration-200">
+                                            <td className="p-3 sm:p-4 border-b text-left">{table.tableName}</td>
+                                            <td className="p-3 sm:p-4 border-b">{table.rowsCount}</td>
+                                            <td className="p-3 sm:p-4 border-b">{table.columns.length}</td>
+                                            <td className="p-3 sm:p-4 border-b">
                                                 <div className="flex justify-center gap-2">
                                                     <button
                                                         onClick={() => handleDeleteTable(table._id)}
-                                                        className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
+                                                        className="px-3 py-1.5 bg-red-500 text-white rounded-xl hover:bg-red-600 active:scale-95 transition-all duration-200 text-xs sm:text-sm font-medium"
+                                                        aria-label={`Delete table ${table.tableName}`}
                                                     >
-                                                        Delete
+                                                        ❌ Delete
                                                     </button>
                                                     <button
-                                                        className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition"
                                                         onClick={() => router.push(`/admin/view-table/${table._id}`)}
+                                                        className="px-3 py-1.5 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600 active:scale-95 transition-all duration-200 text-xs sm:text-sm font-medium"
+                                                        aria-label={`Edit table ${table.tableName}`}
                                                     >
-                                                        Edit
+                                                        ✏️ Edit
                                                     </button>
                                                 </div>
                                             </td>

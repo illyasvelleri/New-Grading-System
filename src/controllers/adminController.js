@@ -318,6 +318,7 @@ export const updateTable = async (req, res) => {
             }));
             const { maxMarks } = calculateMaxMarksOnly(existingTable.data);
             existingTable.maxMarks = maxMarks;
+            existingTable.tableDescription = table.tableDescription;
 
         }
 

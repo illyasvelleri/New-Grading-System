@@ -13,6 +13,11 @@ const studentSchema = new mongoose.Schema({
     type: Map,
     of: mongoose.Schema.Types.Mixed, // Allows dynamic fields like attendance, magazine, etc.
     default: {},
+  },
+  examSummary: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed, // Allows dynamic fields like attendance, magazine, etc.
+    default: {},
   }
 });
 

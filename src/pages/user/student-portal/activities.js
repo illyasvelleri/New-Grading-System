@@ -359,12 +359,12 @@ export default function Home() {
     if (error) return <div className="text-red-500">{error}</div>;
 
     return (
-        <div className="p-4 sm:p-6 bg-white min-h-screen text-gray-900">
+        <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen text-gray-900">
             {/* Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center">
+            <div className="flex flex-col gap-4 mb-6">
                 <select
                     onChange={(e) => setBatch(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 text-sm"
                 >
                     <option value="all">All Batches</option>
                     {[...'1234567'].map((b) => (
@@ -376,85 +376,133 @@ export default function Home() {
                     type="month"
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 text-sm"
                 />
             </div>
 
-
             {/* Add Custom Activity */}
-            <div className="mb-6 p-4 border border-gray-800 rounded-lg shadow bg-gray-900">
-                <h2 className="font-semibold text-green-400 text-lg mb-3">➕ Add Custom Activity</h2>
-                <div className="flex flex-col sm:flex-row gap-3">
+            <div className="mb-6 p-4 bg-white rounded-xl shadow-lg">
+                <h2 className="font-semibold text-green-500 text-base mb-3 flex items-center gap-2">
+                    <span>➕</span> Add Custom Activity
+                </h2>
+                <div className="flex flex-col gap-3">
                     <input
                         type="text"
                         placeholder="Activity name (e.g., Magazine)"
                         value={newField}
                         onChange={(e) => setNewField(e.target.value)}
-                        className="border border-gray-600 rounded-2xl px-3 py-2 flex-1 bg-transperent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm"
                     />
                     <button
                         onClick={handleAddField}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                        className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-shadow shadow-sm hover:shadow-md text-sm font-medium"
                     >
-                        ➕ Add Field
+                        <span className="flex items-center justify-center gap-2">
+                            <span>➕</span> Add Activity
+                        </span>
                     </button>
                 </div>
             </div>
 
-
             {/* Students Table */}
-            <div className="overflow-x-auto border rounded-lg">
-                <table className="min-w-full text-sm text-left border-collapse">
-                    <thead className="bg-gray-100 text-gray-900 uppercase text-xs tracking-wide border-b border-gray-300">
-                        <tr>
-                            <th className="p-3 font-medium">Name</th>
-                            <th className="p-3 font-medium">Roll</th>
-                            <th className="p-3 font-medium">Batch</th>
-                            {customFields.map((field) => (
-                                <th key={field} className="p-3 font-medium relative">
-                                    <div className="flex justify-between items-center">
-                                        <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
-                                        <button
-                                            onClick={() => handleDeleteField(field)}
-                                            className="text-red-500 text-sm ml-2 hover:text-red-700"
-                                            title="Delete field"
-                                        >
-                                            🗑️
-                                        </button>
-                                    </div>
-                                </th>
-                            ))}
-                            <th className="p-3 font-medium text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map((s) => (
-                            <tr key={s._id} className="odd:bg-white even:bg-gray-50 hover:bg-green-50 transition">
-                                <td className="p-2 border text-gray-900">{s.name}</td>
-                                <td className="p-2 border text-gray-900">{s.roll}</td>
-                                <td className="p-2 border text-gray-900">{s.batch}</td>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm text-left">
+                        <thead className="bg-gray-100 text-gray-800 text-xs uppercase font-medium tracking-wide sticky top-0 z-10">
+                            <tr>
+                                <th className="p-3">Name</th>
+                                <th className="p-3">Roll</th>
+                                <th className="p-3 hidden sm:table-cell">Batch</th>
+                                <th className="p-3">Attendance</th>
+                                <th className="p-3 hidden md:table-cell">Al-Zahra</th>
+                                <th className="p-3 hidden md:table-cell">Darshanam</th>
                                 {customFields.map((field) => (
-                                    <td key={field} className="p-2 border">
+                                    <th key={field} className="p-3 hidden lg:table-cell relative">
+                                        <div className="flex items-center justify-between">
+                                            <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
+                                            <button
+                                                onClick={() => handleDeleteField(field)}
+                                                className="ml-2 p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors duration-200"
+                                                title={`Delete ${field}`}
+                                                aria-label={`Delete ${field} field`}
+                                            >
+                                                <svg
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H8V5a2 2 0 012-2zM9 9v8m6-8v8"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </th>
+                                ))}
+                                <th className="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map((s) => (
+                                <tr
+                                    key={s._id}
+                                    className="border-b last:border-none hover:bg-green-50 transition-colors"
+                                >
+                                    <td className="p-3 text-gray-900">{s.name}</td>
+                                    <td className="p-3 text-gray-900">{s.roll}</td>
+                                    <td className="p-3 text-gray-900 hidden sm:table-cell">{s.batch}</td>
+                                    <td className="p-3">
                                         <input
                                             type="number"
-                                            value={editedData[s._id]?.[field] ?? s.monthlySummary?.[month]?.[field] ?? ''}
-                                            onChange={(e) => handleInputChange(s._id, field, e.target.value)}
-                                            className="w-full px-2 py-1 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                                            value={editedData[s._id]?.attendance ?? s.monthlySummary?.[month]?.attendance ?? ''}
+                                            onChange={(e) => handleInputChange(s._id, 'attendance', e.target.value)}
+                                            className="w-full px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 text-sm"
                                         />
                                     </td>
-                                ))}
-                                <td className="p-2 border text-center">
-                                    <button
-                                        onClick={() => UpdateStudent(s._id)}
-                                        className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition text-sm"
-                                    >
-                                        Update
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    <td className="p-3 hidden md:table-cell">
+                                        <input
+                                            type="number"
+                                            value={editedData[s._id]?.['Al-Zahra'] ?? s.monthlySummary?.[month]?.['Al-Zahra'] ?? ''}
+                                            onChange={(e) => handleInputChange(s._id, 'Al-Zahra', e.target.value)}
+                                            className="w-full px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 text-sm"
+                                        />
+                                    </td>
+                                    <td className="p-3 hidden md:table-cell">
+                                        <input
+                                            type="number"
+                                            value={editedData[s._id]?.['Darshanam'] ?? s.monthlySummary?.[month]?.['Darshanam'] ?? ''}
+                                            onChange={(e) => handleInputChange(s._id, 'Darshanam', e.target.value)}
+                                            className="w-full px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 text-sm"
+                                        />
+                                    </td>
+                                    {customFields.map((field) => (
+                                        <td key={field} className="p-3 hidden lg:table-cell">
+                                            <input
+                                                type="number"
+                                                value={editedData[s._id]?.[field] ?? s.monthlySummary?.[month]?.[field] ?? ''}
+                                                onChange={(e) => handleInputChange(s._id, field, e.target.value)}
+                                                className="w-full px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 text-sm"
+                                            />
+                                        </td>
+                                    ))}
+                                    <td className="p-3 text-center">
+                                        <button
+                                            onClick={() => UpdateStudent(s._id)}
+                                            className="w-full sm:w-auto px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-shadow shadow-sm hover:shadow-md text-sm font-medium"
+                                        >
+                                            Update
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

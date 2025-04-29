@@ -16,7 +16,8 @@ const navigation = [
     { name: "Dashboard", href: "/user/student-portal/dashboard", icon: HomeIcon },
     { name: "Students", href: "/user/student-portal/students", icon: UserGroupIcon },
     { name: "Activities", href: "/user/student-portal/activities", icon: UserGroupIcon },
-    { name: "Attendance", href: "/user/student-portal/attendance", icon: UserGroupIcon }
+    { name: "Attendance", href: "/user/student-portal/attendance", icon: UserGroupIcon },
+    { name: "Exam", href: "/user/student-portal/exam", icon: UserGroupIcon }
 ];
 
 export default function StudentPortalSidebar(){
