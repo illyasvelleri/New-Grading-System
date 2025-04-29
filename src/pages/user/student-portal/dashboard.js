@@ -47,14 +47,14 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-xl font-semibold text-gray-800">Schoolio</span>
+              <span className="text-xl font-semibold text-gray-800">Alathurpadi Dars</span>
             </div>
-            <nav className="flex space-x-4">
+            {/* <nav className="flex space-x-4">
               <a href="#" className="text-gray-600 hover:text-gray-800">All</a>
               <a href="#" className="text-gray-600 hover:text-gray-800">Attendance</a>
               <a href="#" className="text-gray-600 hover:text-gray-800">Analytics</a>
               <a href="#" className="text-gray-600 hover:text-gray-800">Reports</a>
-            </nav>
+            </nav> */}
           </div>
           <div className="flex items-center space-x-2">
             <div className="relative">
