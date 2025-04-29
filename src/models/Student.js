@@ -1,24 +1,43 @@
-// models/Student.js
 import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema({
-  name: String,
-  roll: String,
-  batch: String,
-  attendance: {
-    type: Object, // Use Object instead of Map
-    default: {},
+  name: {
+    type: String,
+    required: true,
+    trim: true,
   },
+  roll: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  batch: {
+    type: String,
+    required: true,
+  },
+
+  // Stores summary data by month (e.g., { "2024-04": { attendance: 20, magazine: 5 } })
   monthlySummary: {
     type: Map,
-    of: mongoose.Schema.Types.Mixed, // Allows dynamic fields like attendance, magazine, etc.
+    of: mongoose.Schema.Types.Mixed,
     default: {},
   },
+
+  // Stores exam performance summary (e.g., { "term1": { math: 80, english: 75 } })
   examSummary: {
     type: Map,
-    of: mongoose.Schema.Types.Mixed, // Allows dynamic fields like attendance, magazine, etc.
+    of: mongoose.Schema.Types.Mixed,
     default: {},
-  }
+  },
+
+  // Optional attendance log (e.g., { "2024-04-29": "present" })
+  attendanceSummary: {
+    type: Map,
+    of: String, // 'present' or 'absent'
+    default: {},
+  },
+}, {
+  timestamps: true, // Adds createdAt and updatedAt
 });
 
 export default mongoose.models.Student || mongoose.model('Student', studentSchema);

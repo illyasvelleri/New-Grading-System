@@ -173,8 +173,9 @@ export const viewSection = async (req, res) => {
         newAdminTables.forEach(formatTableData);
         tables.push(...newAdminTables);
 
-        if (!tables.length) {
-            return res.status(404).json({ error: "No tables available for this section." });
+        // Check if there are no tables found, and return a custom message instead of a 404
+        if (tables.length === 0) {
+            return res.status(200).json({ message: "No tables available for this section." });
         }
 
         res.status(200).json({ section, tables });

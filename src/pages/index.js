@@ -139,35 +139,35 @@ export default function Home() {
     {
       title: "The Light of Knowledge",
       desc: "Suhba is where Deen meets discipline. We begin with the story of how knowledge was passed from generation to generation through Darses.",
-      img: "/images/knowledge.jpg",
+      img: "/images/kithab-shelf.jpg",
       badge: "Foundational Learning",
       bg: "bg-gradient-to-r from-green-50 to-white",
     },
     {
       title: "Unity in Vision",
       desc: "35+ Darses united under the visionary Alathurpadi system. Building brotherhood and ilm across generations.",
-      img: "/images/unity.jpg",
+      img: "/images/quran-page.jpg",
       badge: "Community Strength",
       bg: "bg-gradient-to-r from-yellow-50 to-white",
     },
     {
       title: "Holistic Learning",
       desc: "From Qur’an to Hadith, from Tarbiyyah to community leadership – our Dars offers more than a syllabus, it offers a way of life.",
-      img: "/images/learning.jpg",
+      img: "/images/quran.jpg",
       badge: "Comprehensive Education",
       bg: "bg-gradient-to-r from-blue-50 to-white",
     },
     {
       title: "Brotherhood Beyond Books",
       desc: "Students grow not just in knowledge but in character. Living, praying, and serving together forms a bond that lasts a lifetime.",
-      img: "/images/brotherhood.jpg",
+      img: "/images/Muslims-studying.jpg",
       badge: "Lifelong Bonds",
       bg: "bg-gradient-to-r from-pink-50 to-white",
     },
     {
       title: "Your Journey Begins Here",
       desc: "Begin your path to spiritual enlightenment and intellectual clarity. Join Suhba today and be a part of the light.",
-      img: "/images/journey.jpg",
+      img: "/images/beautiful-mosque.jpg",
       badge: "Start Now",
       bg: "bg-gradient-to-r from-gray-50 to-white",
     },
@@ -221,54 +221,112 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen px-6 pt-24 pb-36 flex flex-col items-center justify-center text-center text-white bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
-        <Image
-          src="/images/quran-hero.jpg"
-          alt="Qur'an study background"
-          layout="fill"
-          objectFit="cover"
-          className="absolute inset-0 opacity-20 z-0"
-          priority
+      <section className="relative min-h-screen px-6 sm:px-12 pt-32 pb-20 bg-gradient-to-br from-green-50 to-white overflow-hidden">
+  <div className="max-w-7xl mx-auto relative grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    
+    {/* Left Side Text */}
+    <div className="lg:col-span-6 text-center lg:text-left space-y-6 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-4 py-1 rounded-full"
+      >
+        Sacred Knowledge
+      </motion.div>
+
+      <motion.h1
+        initial={{ opacity: 0, x: -30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight"
+      >
+        <span className="text-green-600">SUHBA</span> — The Spirit of Dars
+      </motion.h1>
+
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="text-lg sm:text-xl text-gray-700 max-w-xl"
+      >
+        Illuminating minds and hearts with sacred knowledge, unity, and purpose.
+      </motion.p>
+
+      <motion.a
+        href="#join"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+        className="mt-6 inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Begin Your Journey
+      </motion.a>
+    </div>
+
+    {/* Right Side: Decorative Image + Trust Points */}
+    <div className="lg:col-span-6 flex flex-col items-center gap-6 relative">
+      
+      {/* Circular Image with Border and Glow */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1 }}
+        className="relative w-72 h-72 rounded-full overflow-hidden border-[6px] border-green-200 shadow-xl ring-4 ring-green-100 hover:ring-green-300 transition-all duration-300"
+      >
+        <img
+          src="/Images/beautiful-mosque.jpg" // ✅ Replace with actual image path
+          alt="Suhba students"
+          className="w-full h-full object-cover"
         />
-        <div className="relative z-10 max-w-4xl mx-auto">
+      </motion.div>
+
+      {/* Floating Points */}
+      <div className="space-y-5 w-full max-w-md mt-6">
+        {[
+          {
+            title: '35+ Darses United',
+            text: 'Part of the Alathurpadi system empowering generations with authentic knowledge.',
+          },
+          {
+            title: 'Suhba & Character',
+            text: 'More than classes — students grow in discipline, brotherhood, and service.',
+          },
+          {
+            title: 'Spiritual Journey',
+            text: 'Every lesson is a step closer to light. Build your path with us.',
+          },
+        ].map((point, i) => (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="inline-block bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4 shadow-md"
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 + i * 0.2 }}
+            className="flex items-start gap-4 p-3 rounded-lg hover:bg-green-50 transition-all duration-300 group"
           >
-            Sacred Knowledge
+            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+              <svg fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" className="w-10 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold text-gray-800 group-hover:text-green-600 transition-all duration-300">{point.title}</h4>
+              <p className="text-gray-600 text-sm mt-1">{point.text}</p>
+            </div>
           </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-6"
-          >
-            <span className="text-green-400">Suhba</span> – The Spirit of Dars
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg sm:text-xl text-gray-200 max-w-2xl mx-auto italic"
-          >
-            “Illuminating minds and hearts with sacred knowledge.”
-          </motion.p>
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-8 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2 mx-auto"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Begin Your Journey
-          </motion.button>
-        </div>
-      </section>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
 
       {/* Story Sections */}
       {sections.map((sec, index) => (
@@ -277,11 +335,13 @@ export default function Home() {
           className={`min-h-[80vh] px-6 sm:px-10 pt-20 pb-24 flex items-center justify-center ${sec.bg}`}
         >
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+            {/* Image Part */}
             <motion.div
               initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
-              className="relative h-64 md:h-96 rounded-2xl shadow-lg overflow-hidden"
+              className={`relative h-64 md:h-96 rounded-2xl shadow-lg overflow-hidden ${index % 2 !== 0 ? "md:order-2" : ""}`}
             >
               <Image
                 src={sec.img}
@@ -295,7 +355,9 @@ export default function Home() {
                 {sec.badge}
               </div>
             </motion.div>
-            <div className="text-center md:text-left">
+
+            {/* Text Part */}
+            <div className={`text-center md:text-left ${index % 2 !== 0 ? "md:order-1" : ""}`}>
               <motion.h2
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -322,9 +384,17 @@ export default function Home() {
                 Learn More
               </motion.a>
             </div>
+
           </div>
         </section>
       ))}
+
+      <footer className="bg-gray-100 text-center py-6 mt-10 py-24">
+        <p className="text-gray-600 text-sm">
+          &copy; {new Date().getFullYear()} Suhba. All rights reserved.
+        </p>
+      </footer>
+
     </div>
   );
 }

@@ -229,6 +229,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import StudentPortalSidebar from '@/components/StudentPortalSidebar';
 
 export default function Home() {
     const [students, setStudents] = useState([]);
@@ -359,9 +360,11 @@ export default function Home() {
     if (error) return <div className="text-red-500">{error}</div>;
 
     return (
-        <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen text-gray-900">
-            {/* Controls */}
-            <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-col md:flex-row bg-gradient-to-b from-gray-50 to-white min-h-screen text-gray-900">
+            <StudentPortalSidebar />
+           <div className='flex-1 p-6 mt-12'>
+             {/* Controls */}
+             <div className="flex flex-col gap-4 mb-6">
                 <select
                     onChange={(e) => setBatch(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 text-sm"
@@ -504,6 +507,7 @@ export default function Home() {
                     </table>
                 </div>
             </div>
+           </div>
         </div>
 
     );

@@ -88,9 +88,9 @@ export default function ProfileEdit() {
   if (loading) return <p className="text-center text-gray-500">Loading...</p>;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-tr from-blue-50 via-gray-50 to-white text-xs sm:text-sm text-gray-700 pb-36">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-tr from-blue-50 via-gray-50 to-white text-xs sm:text-sm text-gray-700">
       <UserHeader />
-      <div className="flex-1 p-3 sm:p-4 md:p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-4 md:p-6 space-y-6 py-24">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-gray-900 mb-8 tracking-tight">
           Edit Profile
         </h2>
