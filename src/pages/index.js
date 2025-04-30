@@ -278,7 +278,7 @@ export default function Home() {
         className="relative w-72 h-72 rounded-full overflow-hidden border-[6px] border-green-200 shadow-xl ring-4 ring-green-100 hover:ring-green-300 transition-all duration-300"
       >
         <img
-          src="/Images/beautiful-mosque.jpg" // ✅ Replace with actual image path
+          src="/images/beautiful-mosque.jpg" // ✅ Replace with actual image path
           alt="Suhba students"
           className="w-full h-full object-cover"
         />
