@@ -103,61 +103,79 @@ export default function Register() {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow bg-gray-500">
-            <h1 className="text-2xl font-semibold mb-6 text-center">User Registration</h1>
-            <form onSubmit={handleRegister} className="space-y-4 text-gray-800">
-                <input
-                    type="text"
-                    placeholder="User Name"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+  <div className="max-w-md mx-auto bg-white shadow-lg rounded-xl p-8">
+    <h1 className="text-3xl font-bold text-center text-[#10b981] mb-6">User Registration</h1>
 
-                <div className="flex flex-col md:flex-row gap-4">
-                    <select
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        required
-                        className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="" disabled>
-                            Select Category
-                        </option>
-                        <option value="below-20">Below 20</option>
-                        <option value="below-50">Below 50</option>
-                        <option value="above-50">Above 50</option>
-                    </select>
+    <form onSubmit={handleRegister} className="space-y-4 text-gray-700">
+      {/* Username Input */}
+      <input
+        type="text"
+        placeholder="User Name"
+        value={formData.username}
+        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+        required
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+      />
 
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                        className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
+      {/* Email Input */}
+      <input
+        type="email"
+        placeholder="Email"
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        required
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+      />
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                >
-                    Register
-                </button>
-            </form>
+      {/* Category + Password */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <select
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          required
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+        >
+          <option value="" disabled>Select Category</option>
+          <option value="below-20">Below 20</option>
+          <option value="below-50">Below 50</option>
+          <option value="above-50">Above 50</option>
+        </select>
 
-            {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
-            {success && <p className="text-green-600 mt-4 text-sm">{success}</p>}
-        </div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          required
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+        />
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className="w-full py-2 bg-[#10b981] text-white rounded-lg hover:bg-[#064e3b] transition-all font-semibold"
+      >
+        Register
+      </button>
+    </form>
+
+    {/* Feedback Messages */}
+    {error && <p className="mt-4 text-center text-red-500 text-sm">{error}</p>}
+    {success && <p className="mt-4 text-center text-green-600 text-sm">{success}</p>}
+
+    {/* Login Redirect */}
+    <div className="mt-4 text-center">
+      <p className="text-sm text-gray-600">
+        Already have an account?{" "}
+        <a href="/user/login" className="text-[#10b981] hover:text-[#064e3b] font-semibold">
+          Login here
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
     );
 }
