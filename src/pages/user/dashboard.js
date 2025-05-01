@@ -465,7 +465,7 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 sm:p-6 md:p-8 space-y-8">
+      <main className="flex-1 p-4 sm:p-6 md:p-8 space-y-8 pb-36">
         {/* Welcome Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
