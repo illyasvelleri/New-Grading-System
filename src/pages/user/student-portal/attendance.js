@@ -11,6 +11,7 @@ const AttendanceDashboard = () => {
     const [presentToday, setPresentToday] = useState(0);
     const [absentToday, setAbsentToday] = useState(0);
     const [totalPercentage, setTotalPercentage] = useState(0);
+    const [viewMode, setViewMode] = useState('day'); // 'day' or 'month'
     const [selectedDate, setSelectedDate] = useState(() => {
         return new Date().toISOString().split('T')[0]; // default to today
     });
@@ -18,37 +19,51 @@ const AttendanceDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch students by batch
                 const studentResponse = await axios.get(`/api/students?batch=${batch}`);
                 setStudents(studentResponse.data);
 
-                // Fetch attendance for selected date
-                const attendanceResponse = await axios.get(`/api/studentPortal/attendanceRecords?date=${selectedDate}&batch=${batch}`);
-                const attendanceMap = {};
-                attendanceResponse.data.students.forEach((record) => {
-                    attendanceMap[record._id] = record.status;
-                });
+                let attendanceMap = {};
 
-                setAttendanceData(attendanceMap);
+                if (viewMode === 'day') {
+                    // Daily attendance logic (if necessary)
+                    const response = await axios.get(`/api/studentPortal/attendanceRecords?date=${selectedDate}&batch=${batch}`);
+                    response.data.students.forEach((record) => {
+                        attendanceMap[record._id] = record.status;
+                    });
+                    const presentCount = Object.values(attendanceMap).filter((status) => status === 'present').length;
+                    setPresentToday(presentCount);
+                    setAbsentToday(studentResponse.data.length - presentCount);
+                    setTotalPercentage(((presentCount / studentResponse.data.length) * 100).toFixed(2));
+                } else {
+                    // Monthly attendance logic (only total attendance)
+                    const response = await axios.get(`/api/studentPortal/monthlyAttendanceRecords?month=${selectedDate.slice(0, 7)}&batch=${batch}`);
+                    response.data.forEach((record) => {
+                        attendanceMap[record.studentId] = record.total; // Store total attendance
+                    });
 
-                // Recalculate attendance when students and attendance data are fetched
-                const presentCount = Object.values(attendanceMap).filter((status) => status === 'present').length;
-                setPresentToday(presentCount);
+                    setAttendanceData(attendanceMap);
 
-                // Ensure to check length only after students data is fetched
-                const absentCount = studentResponse.data.length - presentCount;
-                setAbsentToday(absentCount);
+                    // Calculate total present and absent based on total attendance (you may change the logic here)
+                    let totalPresent = 0;
+                    let totalPossible = 0;
 
-                // Calculate total percentage of present students
-                const percentage = (presentCount / studentResponse.data.length) * 100;
-                setTotalPercentage(percentage.toFixed(2));
-            } catch (error) {
-                console.error('Error fetching data:', error);
+                    Object.values(attendanceMap).forEach((attendance) => {
+                        totalPresent += attendance; // Assuming you want to track total attendance as 'present'
+                        totalPossible += 1;  // Assuming each student has the possibility of attending all days
+                    });
+
+                    setPresentToday(totalPresent);
+                    setAbsentToday(totalPossible - totalPresent);
+                    setTotalPercentage(((totalPresent / totalPossible) * 100).toFixed(2));
+                }
+
+            } catch (err) {
+                console.error('Error fetching data:', err);
             }
         };
 
         fetchData();
-    }, [batch, selectedDate]); // Re-run when batch or selectedDate changes
+    }, [batch, selectedDate, viewMode]);
 
 
     const handleAttendanceMark = async (studentId, status) => {
@@ -75,6 +90,23 @@ const AttendanceDashboard = () => {
         }
     };
 
+    const handleSaveAttendance = async (studentId) => {
+        const totalAttendance = attendanceData[studentId];
+
+        try {
+            await axios.post('/api/studentPortal/monthlyAttendance', {
+                studentId,
+                month: selectedDate.slice(0, 7),  // Use the month portion of selectedDate
+                batch,
+                total: totalAttendance, // Only save the total attendance for the month
+            });
+            alert("Attendance saved successfully!");
+        } catch (error) {
+            console.error("Error saving attendance:", error);
+        }
+    };
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex flex-col md:flex-row">
             <StudentPortalSidebar />
@@ -82,46 +114,46 @@ const AttendanceDashboard = () => {
             <main className="flex-1 p-4 sm:p-6 lg:p-8">
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
-  <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
-    <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
-      <i className="fas fa-users text-blue-500 text-xl"></i>
-    </div>
-    <div>
-      <p className="text-gray-500 text-sm">Total Students</p>
-      <h2 className="text-2xl font-bold text-blue-700">{students.length}</h2>
-    </div>
-  </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
+                            <i className="fas fa-users text-blue-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-sm">Total Students</p>
+                            <h2 className="text-2xl font-bold text-blue-700">{students.length}</h2>
+                        </div>
+                    </div>
 
-  <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
-    <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
-      <i className="fas fa-check-circle text-green-500 text-xl"></i>
-    </div>
-    <div>
-      <p className="text-gray-500 text-sm">Present Today</p>
-      <h2 className="text-2xl font-bold text-green-700">{presentToday}</h2>
-    </div>
-  </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
+                            <i className="fas fa-check-circle text-green-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-sm">Present Today</p>
+                            <h2 className="text-2xl font-bold text-green-700">{presentToday}</h2>
+                        </div>
+                    </div>
 
-  <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
-    <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full">
-      <i className="fas fa-times-circle text-red-500 text-xl"></i>
-    </div>
-    <div>
-      <p className="text-gray-500 text-sm">Absent Today</p>
-      <h2 className="text-2xl font-bold text-red-700">{absentToday}</h2>
-    </div>
-  </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full">
+                            <i className="fas fa-times-circle text-red-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-sm">Absent Today</p>
+                            <h2 className="text-2xl font-bold text-red-700">{absentToday}</h2>
+                        </div>
+                    </div>
 
-  <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
-    <div className="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-full">
-      <i className="fas fa-percentage text-indigo-500 text-xl"></i>
-    </div>
-    <div>
-      <p className="text-gray-500 text-sm">Attendance %</p>
-      <h2 className="text-2xl font-bold text-indigo-700">{totalPercentage}%</h2>
-    </div>
-  </div>
-</div>
+                    <div className="bg-white p-6 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-full">
+                            <i className="fas fa-percentage text-indigo-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-sm">Attendance %</p>
+                            <h2 className="text-2xl font-bold text-indigo-700">{totalPercentage}%</h2>
+                        </div>
+                    </div>
+                </div>
 
 
 
@@ -139,21 +171,43 @@ const AttendanceDashboard = () => {
                                     : 'bg-gray-100 text-gray-700 hover:bg-blue-100'
                                     }`}
                             >
-                                {b === 'all' ? 'All Batches' : `Batch ${b}`}
+                                {b === 'all' ? 'All Batches' : `${b}`}
                             </button>
                         ))}
                     </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setViewMode('day')}
+                            className={`px-4 py-2 rounded-xl ${viewMode === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                            Day View
+                        </button>
+                        <button
+                            onClick={() => setViewMode('month')}
+                            className={`px-4 py-2 rounded-xl ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                            Monthly View
+                        </button>
+                    </div>
+
 
                     {/* Date Picker */}
-                    <div className="flex items-center gap-3">
-                        <label className="text-sm font-medium text-gray-600">📅 Select Date:</label>
+                    {viewMode === 'day' ? (
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="px-4 py-2 rounded-xl border border-gray-300 shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="px-4 py-2 rounded-xl border"
                         />
-                    </div>
+                    ) : (
+                        <input
+                            type="month"
+                            value={selectedDate.slice(0, 7)} // yyyy-mm
+                            onChange={(e) => setSelectedDate(e.target.value + '-01')} // add dummy day
+                            className="px-4 py-2 rounded-xl border"
+                        />
+                    )}
+
                 </div>
 
 
@@ -177,24 +231,54 @@ const AttendanceDashboard = () => {
 
                             {/* Present / Absent Buttons */}
                             <div className="mt-4 flex gap-2">
-                                <button
-                                    onClick={() => handleAttendanceMark(student._id, 'present')}
-                                    className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-all duration-200 shadow-sm ${attendanceData[student._id] === 'present'
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                                        }`}
-                                >
-                                    ✅ Present
-                                </button>
-                                <button
-                                    onClick={() => handleAttendanceMark(student._id, 'absent')}
-                                    className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-all duration-200 shadow-sm ${attendanceData[student._id] === 'absent'
-                                            ? 'bg-red-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    ❌ Absent
-                                </button>
+                                {viewMode === 'day' ? (
+                                    <div className="mt-4 flex gap-2">
+                                        <button
+                                            onClick={() => handleAttendanceMark(student._id, 'present')}
+                                            className={`...`}
+                                        >
+                                            ✅ Present
+                                        </button>
+                                        <button
+                                            onClick={() => handleAttendanceMark(student._id, 'absent')}
+                                            className={`...`}
+                                        >
+                                            ❌ Absent
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex flex-col text-sm text-gray-600">
+                                        <label htmlFor={`monthly-${student._id}`} className="mb-1">
+                                            Monthly Attendance:
+                                        </label>
+                                        <input
+                                            id={`total-${student._id}`}
+                                            type="number"
+                                            value={attendanceData[student._id] || 0}  // Display current total attendance or 0 if not set
+                                            onChange={(e) => {
+                                                const newValue = parseInt(e.target.value, 10);
+                                                if (!isNaN(newValue)) {
+                                                    setAttendanceData((prev) => ({
+                                                        ...prev,
+                                                        [student._id]: newValue,
+                                                    }));
+                                                }
+                                            }}
+                                            className="border rounded-lg px-2 py-1 text-sm w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+
+                                        <button
+                                            onClick={() => handleSaveAttendance(student._id)}
+                                            className="mt-2 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                                        >
+                                            Save
+                                        </button>
+
+                                    </div>
+
+
+                                )}
+
                             </div>
 
                             {/* Background Accent */}
