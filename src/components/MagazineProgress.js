@@ -5,7 +5,6 @@ export default function MagazineProgress() {
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [loading, setLoading] = useState(false);
 
-  // Map months to numbers
   const monthMapping = {
     January: '01',
     February: '02',
@@ -21,65 +20,49 @@ export default function MagazineProgress() {
     December: '12',
   };
 
-  const currentYear = new Date().getFullYear(); // Example: 2025
+  const currentYear = new Date().getFullYear();
+  const activities = ['Al-Zahra', 'Darshanam'];
 
   useEffect(() => {
-    const fetchMagazineProgressBar = async () => {
+    const fetchMagazineData = async () => {
       if (!selectedMonth) return;
-
       setLoading(true);
+
       try {
         const monthNumber = monthMapping[selectedMonth];
         const formattedMonth = `${currentYear}-${monthNumber}`;
-        console.log('formattedMonth:', formattedMonth);
-
         const res = await fetch(`/api/magazine-activities?month=${formattedMonth}`);
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
         const data = await res.json();
         setStats(data);
       } catch (err) {
-        console.error('Error fetching progress bar data:', err.message);
+        console.error('Error fetching magazine data:', err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMagazineProgressBar();
+    fetchMagazineData();
   }, [selectedMonth]);
 
-  const activities = ['Al-Zahra', 'Darshanam'];
-
-  // Function to calculate total for each activity
   const getTotal = (activity) => {
-    const monthNumber = monthMapping[selectedMonth];
-    const monthKey = `${currentYear}-${monthNumber}`;
-
-    return stats.reduce((total, student) => {
-      const value = student.monthlySummary?.[monthKey]?.[activity] || 0;
-      return total + value;
+    const monthKey = `${currentYear}-${monthMapping[selectedMonth]}`;
+    return stats.reduce((sum, student) => {
+      return sum + (student.monthlySummary?.[monthKey]?.[activity] || 0);
     }, 0);
   };
 
-  // Calculate progress percentage for each activity
-  const getProgress = (activity) => {
-    const total = getTotal(activity);
-    const maxGoal = 100; // Assuming the max goal is 100, adjust as needed
-    return (total / maxGoal) * 100;
-  };
-
   return (
-    <div className="w-full h-full flex flex-col justify-center p-4">
+    <div className="w-full p-3 sm:p-4 lg:p-5 bg-white rounded-2xl shadow-md">
       {/* Month Selector */}
       <div className="mb-4">
+        <label htmlFor="monthSelect" className="block text-xs font-medium text-gray-700 mb-1">
+          Select Month
+        </label>
         <select
+          id="monthSelect"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
-          className="px-3 py-1 bg-white rounded-full text-gray-700 focus:outline-none focus:ring focus:ring-blue-200 w-full text-sm transition-colors duration-200"
-          aria-label="Select month for progress"
+          className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-sm bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
         >
           {Object.keys(monthMapping).map((month) => (
             <option key={month} value={month}>
@@ -89,53 +72,33 @@ export default function MagazineProgress() {
         </select>
       </div>
 
-      {/* Total Progress for Al-Zahra and Darshanam */}
+      {/* Stats Grid */}
       {loading ? (
-        <div className="text-center text-gray-500 text-sm">Loading...</div>
+        <div className="text-center text-gray-500 text-sm py-6">Loading...</div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {activities.map((activity) => {
-            const total = getTotal(activity);
-            const activityProgress = getProgress(activity);
-
-            return (
-              <div key={activity} className="flex flex-col">
-              <div className="flex justify-between items-center mb-1.5">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-semibold text-gray-800">{activity}</span>
-                  <span className="text-xs text-gray-500">{getTotal(activity)}</span>
-                </div>
-                <span className="text-sm font-semibold text-blue-600">{Math.round(activityProgress)}%</span>
-              </div>
-              <div className="relative flex">
-                <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full shadow-sm transition-all duration-300 hover:brightness-110"
-                    style={{
-                      backgroundImage: 'linear-gradient(to right, #3b82f6, #60a5fa)',
-                      width: `${activityProgress}%`,
-                      transition: 'width 1s ease-out',
-                    }}
-                    role="progressbar"
-                    aria-valuenow={activityProgress}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  />
-                </div>
-                <div
-                  className="absolute -right-2 -top-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  style={{ transform: `translateX(${activityProgress}%)` }}
-                >
-                  <div className="bg-gray-800 text-white text-xs rounded-md px-2 py-1">
-                    {Math.round(activityProgress)}%
-                  </div>
-                </div>
-              </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          {activities.map((activity) => (
+            <div
+              key={activity}
+              className="bg-gradient-to-tr from-blue-100 via-blue-50 to-white rounded-xl shadow p-4 hover:shadow-md transition"
+            >
+              <p className="text-xs text-gray-500 mb-1">{activity}</p>
+              <h2 className="text-2xl font-bold text-blue-600">{getTotal(activity)}</h2>
+              <p className="text-xs text-gray-400">Total</p>
             </div>
-            );
-          })}
+          ))}
         </div>
       )}
+
+      {/* Learn More Button */}
+      <div className="mt-6">
+        <button className="w-full py-2 bg-pink-500 text-white text-sm font-semibold rounded-full hover:bg-pink-600 transition">
+          Learn More
+        </button>
+      </div>
     </div>
+
+
+
   );
 }
