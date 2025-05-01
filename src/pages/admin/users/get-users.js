@@ -1,78 +1,148 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { ArrowRight } from "lucide-react"; // You can install lucide-react if needed
+import { ArrowRight, Trash2 } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 
 export default function UsersList() {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [adminPassword1, setAdminPassword1] = useState("");
+  const [adminPassword2, setAdminPassword2] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const router = useRouter();
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-    const fetchUsers = async () => {
-        try {
-            const res = await axios.get("/api/admin/users/get-users");
-            setUsers(res.data.users || []);
-            setLoading(false);
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-            setLoading(false);
-            if (error.response?.status === 401) {
-                router.push("/admin/login");
-            }
-        }
-    };
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get("/api/admin/users/get-users");
+      setUsers(res.data.users || []);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      if (error.response?.status === 401) {
+        router.push("/admin/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleBack = () => {
-        router.push("/admin/dashboard");
-    };
+  const goToUserPage = (id) => router.push(`/admin/users/${id}`);
 
-    const goToUserPage = (id) => {
-        router.push(`/admin/users/${id}`);
-    };
+  const confirmDelete = (userId) => {
+    setSelectedUserId(userId);
+    setShowModal(true);
+  };
 
-    return (
-        <div className="min-h-screen w-full bg-white text-gray-900 flex flex-col md:flex-row overflow-x-auto">
+  const deleteUser = async () => {
+    if (!adminPassword1 || adminPassword1 !== adminPassword2) {
+      alert("Passwords do not match or are empty.");
+      return;
+    }
 
+    try {
+      const res = await axios.post("/api/admin/users/delete-user", {
+        userId: selectedUserId,
+        password: adminPassword1,
+      });
+
+      if (res.data.success) {
+        alert("User deleted.");
+        fetchUsers(); // Refresh
+        setShowModal(false);
+        setAdminPassword1("");
+        setAdminPassword2("");
+      } else {
+        alert(res.data.message || "Failed to delete.");
+      }
+    } catch (err) {
+      alert("Error deleting user.");
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-white text-gray-900 flex flex-col md:flex-row">
       <AdminSidebar />
-        <div className="flex-1 p-6 md:p-10bg-white p-6 py-24 min-h-screen">
-            <div className="flex justify-between items-center mb-10">
-                <h1 className="text-4xl font-bold text-gray-900">All Users</h1>
+      <div className="flex-1 p-6 py-24 bg-white">
+        <h1 className="text-4xl font-bold mb-10">All Users</h1>
+
+        {loading ? (
+          <p className="text-gray-600">Loading users...</p>
+        ) : users.length === 0 ? (
+          <p className="text-gray-600">No users found.</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {users.map((user) => (
+              <div
+                key={user._id}
+                className="relative p-6 bg-white rounded-xl shadow hover:shadow-xl transition"
+              >
+                <h2 className="text-xl font-semibold text-green-800">{user.username}</h2>
+                <p className="text-gray-600 mt-1">Email: {user.email}</p>
+                <p className="text-gray-700">Category: {user.category || "N/A"}</p>
+
+                <button
+                  onClick={() => goToUserPage(user._id)}
+                  className="absolute top-4 right-4 text-blue-600 hover:text-blue-800"
+                  title="View Details"
+                >
+                  <ArrowRight />
+                </button>
+
+                <button
+                  onClick={() => confirmDelete(user._id)}
+                  className="mt-4 text-red-500 hover:text-red-700 text-sm"
+                >
+                  <Trash2 className="inline w-4 h-4 mr-1" />
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+              <h2 className="text-lg font-bold mb-4 text-gray-900">Confirm Admin Password</h2>
+              <input
+                type="password"
+                placeholder="Enter password"
+                className="w-full mb-3 p-2 border border-gray-300 rounded"
+                value={adminPassword1}
+                onChange={(e) => setAdminPassword1(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Re-enter password"
+                className="w-full mb-4 p-2 border border-gray-300 rounded"
+                value={adminPassword2}
+                onChange={(e) => setAdminPassword2(e.target.value)}
+              />
+              <div className="flex justify-end space-x-3">
+                <button
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  onClick={deleteUser}
+                >
+                  Delete User
+                </button>
+              </div>
             </div>
-
-            {loading ? (
-                <p className="text-gray-600 text-center">Loading users...</p>
-            ) : users.length === 0 ? (
-                <p className="text-gray-600 text-center">No users found.</p>
-            ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {users.map((user) => (
-                        <div
-                            key={user._id}
-                            className="relative p-6 bg-white text-gray-900 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-                        >
-                            <h2 className="text-xl font-semibold text-green-800">{user.username || "Unnamed User"}</h2>
-                            <p className="text-gray-600 mt-2">Email: {user.email || "N/A"}</p>
-                            <p className="text-gray-700 mt-1">Category: {user.category || "N/A"}</p>
-
-                            <button
-                                onClick={() => goToUserPage(user._id)}
-                                className="absolute top-4 right-4 text-blue-600 hover:text-blue-800 transition duration-300"
-                                title="View Details"
-                            >
-                                <ArrowRight />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-
-
-        </div>
-    );
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
