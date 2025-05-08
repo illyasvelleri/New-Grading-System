@@ -38,9 +38,12 @@ const studentSchema = new mongoose.Schema({
   },
   attendanceTotal: {
     type: Map,
-    of: String, // or Number if you prefer
-    default: {},
+    of: new mongoose.Schema({
+      total: Number,
+      workingDays: Number,
+    }, { _id: false })
   },
+
 }, {
   timestamps: true, // Adds createdAt and updatedAt
 });
