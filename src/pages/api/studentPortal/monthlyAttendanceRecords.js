@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    await db(); // Connect to MongoDB
+    await db();
 
     const filter = batch && batch !== 'all' ? { batch } : {};
     const students = await Student.find(filter);
@@ -21,14 +21,17 @@ export default async function handler(req, res) {
     const results = [];
 
     students.forEach((student) => {
-      const total = student.attendanceTotal?.get(month) || 0;
+      const attendanceData = student.attendanceTotal?.get(month) || {};
+      const total = parseInt(attendanceData.total) || 0;
+      const workingDays = parseInt(attendanceData.workingDays) || 0;
 
       results.push({
         studentId: student._id,
         name: student.name,
         roll: student.roll,
         batch: student.batch,
-        total: parseInt(total), // Convert to number if stored as string
+        total,
+        workingDays
       });
     });
 
