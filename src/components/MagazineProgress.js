@@ -89,7 +89,6 @@ export default function MagazineProgress() {
           ))}
         </div>
       )}
-
       {/* Learn More Button */}
       <div className="mt-6">
         <button className="w-full py-2 bg-pink-500 text-white text-sm font-semibold rounded-full hover:bg-pink-600 transition">
@@ -97,8 +96,5 @@ export default function MagazineProgress() {
         </button>
       </div>
     </div>
-
-
-
   );
 }
