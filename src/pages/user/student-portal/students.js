@@ -108,24 +108,24 @@ export default function Home() {
 
         {/* Students Table */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
+          <div className="w-full overflow-x-auto">
+            <table className="min-w-[800px] w-full text-sm text-left">
               <thead className="bg-green-50 text-green-800 text-xs uppercase font-medium tracking-wide sticky top-0">
                 <tr>
-                  <th className="p-4">Name</th>
-                  <th className="p-4 hidden sm:table-cell">Roll</th>
-                  <th className="p-4 hidden md:table-cell">Batch</th>
+                  <th className="p-4 border border-gray-200">Name</th>
+                  <th className="p-4 border border-gray-200">Roll</th>
+                  <th className="p-4 border border-gray-200">Batch</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((s) => (
                   <tr
                     key={s._id}
-                    className="border-b last:border-none hover:bg-green-50 transition-colors duration-200"
+                    className="hover:bg-green-50 transition-colors duration-200"
                   >
-                    <td className="p-4 text-gray-900">{s.name}</td>
-                    <td className="p-4 text-gray-900 hidden sm:table-cell">{s.roll}</td>
-                    <td className="p-4 text-gray-900 hidden md:table-cell">{s.batch}</td>
+                    <td className="border border-gray-200 align-top p-4">{s.name}</td>
+                    <td className="border border-gray-200 align-top p-4">{s.roll}</td>
+                    <td className="border border-gray-200 align-top p-4">{s.batch}</td>
                   </tr>
                 ))}
               </tbody>
