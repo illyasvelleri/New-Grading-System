@@ -1,5 +1,5 @@
-import db from '../../../lib/db.js';
-import Student from '../../../models/Student.js';
+import db from '@/lib/db.js';
+import Student from '@/models/Student.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
