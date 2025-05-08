@@ -134,7 +134,7 @@ export default function Home() {
     return (
         <div className="flex flex-col md:flex-row bg-gradient-to-b from-blue-50 to-white min-h-screen text-gray-900 font-sans">
             <StudentPortalSidebar />
-            <div className='flex-1 p-6  pb-24 pt-12'>
+            <div className='flex-1 p-6  pb-24 pt-16'>
                 {/* Controls */}
                 <div className="flex flex-col gap-4 mb-6">
                     <select
@@ -194,10 +194,10 @@ export default function Home() {
                             <thead className="bg-green-50 text-green-800 text-xs uppercase font-medium tracking-wide sticky top-0 z-10">
                                 <tr>
                                     <th className="p-3 sm:p-4">Name</th>
-                                    <th className="p-3 sm:p-4 hidden sm:table-cell">Roll</th>
-                                    <th className="p-3 sm:p-4 hidden md:table-cell">Batch</th>
+                                    <th className="p-3 sm:p-4">Roll</th>
+                                    <th className="p-3 sm:p-4">Batch</th>
                                     {customFields.map((field) => (
-                                        <th key={field} className="p-3 sm:p-4 hidden lg:table-cell">
+                                        <th key={field} className="p-3 sm:p-4">
                                             <div className="flex items-center justify-between">
                                                 <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
                                                 <button
@@ -234,10 +234,10 @@ export default function Home() {
                                         className="border-b last:border-none hover:bg-green-50 transition-colors duration-200"
                                     >
                                         <td className="p-3 sm:p-4 text-gray-900">{s.name}</td>
-                                        <td className="p-3 sm:p-4 text-gray-900 hidden sm:table-cell">{s.roll}</td>
-                                        <td className="p-3 sm:p-4 text-gray-900 hidden md:table-cell">{s.batch}</td>
+                                        <td className="p-3 sm:p-4 text-gray-900">{s.roll}</td>
+                                        <td className="p-3 sm:p-4 text-gray-900">{s.batch}</td>
                                         {customFields.map((field) => (
-                                            <td key={field} className="p-3 sm:p-4 hidden lg:table-cell">
+                                            <td key={field} className="p-3 sm:p-4">
                                                 <input
                                                     type="number"
                                                     value={editedData[s._id]?.[field] ?? s.examSummary?.[month]?.[field] ?? ''}
