@@ -3,13 +3,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import StudentPortalSidebar from '../../../components/StudentPortalSidebar';
-import MagazineProgress from "@/components/MagazineProgress";
 
 const Dashboard = () => {
   const [totalStudents, setTotalStudents] = useState(0);
   const [presentToday, setPresentToday] = useState(0);
   const [absentToday, setAbsentToday] = useState(0);
   const [batchStats, setBatchStats] = useState({});
+  const [magazineStats, setMagazineStats] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState('January');
+  const [magazineLoading, setMagazineLoading] = useState(false);
+  const [topToppers, setTopToppers] = useState({});
+
+  const monthMapping = {
+    January: '01', February: '02', March: '03', April: '04',
+    May: '05', June: '06', July: '07', August: '08',
+    September: '09', October: '10', November: '11', December: '12',
+  };
+
+  const currentYear = new Date().getFullYear();
+  const activities = ['Al-Zahra', 'Darshanam'];
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -27,115 +39,232 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    const fetchMagazineData = async () => {
+      if (!selectedMonth) return;
+      setMagazineLoading(true);
+      try {
+        const monthNumber = monthMapping[selectedMonth];
+        const formattedMonth = `${currentYear}-${monthNumber}`;
+        const res = await axios.get(`/api/magazine-activities?month=${formattedMonth}`);
+        setMagazineStats(res.data);
+      } catch (err) {
+        console.error('Error fetching magazine data:', err.message);
+      } finally {
+        setMagazineLoading(false);
+      }
+    };
+
+    fetchMagazineData();
+  }, [selectedMonth]);
+
+  useEffect(() => {
+    const fetchToppers = async () => {
+      try {
+        const monthNumber = monthMapping[selectedMonth];
+        const formattedMonth = `${currentYear}-${monthNumber}`;
+        const response = await axios.get(`/api/studentPortal/examTopers?month=${formattedMonth}`);
+        setTopToppers(response.data);
+      } catch (error) {
+        console.error('Failed to fetch exam toppers:', error.message);
+      }
+    };
+
+    fetchToppers();
+  }, [selectedMonth]);
+
+  // Calculate magazine activity totals
+  const calculateActivityTotal = (activity) => {
+    const monthKey = `${currentYear}-${monthMapping[selectedMonth]}`;
+    return magazineStats.reduce((sum, student) => {
+      return sum + (student.monthlySummary?.[monthKey]?.[activity] || 0);
+    }, 0);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-100 via-orange-100 to-yellow-50 text-gray-900 font-sans">
+    <div className="flex flex-col md:flex-row bg-gradient-to-b from-blue-50 to-white min-h-screen text-gray-900 font-sans">
+      {/* Main content */}
+      {/* Sidebar */}
       <StudentPortalSidebar />
-
-      <div className="flex-1 p-4 sm:p-6 lg:p-10">
-        {/* Topbar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
-          <h1 className="text-3xl font-bold text-pink-600">Alathurpadi Dars</h1>
-          <div className="flex items-center w-full sm:w-auto gap-3">
-            <input
-              type="text"
-              placeholder="Search"
-              className="flex-1 px-4 py-2 bg-white rounded-full border border-pink-300 shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
-            />
-            <div className="w-10 h-10 rounded-full bg-pink-400 shadow-inner" />
-          </div>
-        </div>
-
-        {/* Main Layout */}
-        {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Overall Stats - 6/12 */}
-          <div className="lg:col-span-6 flex flex-col gap-6">
-            <div className="bg-green-400 p-8 rounded-3xl shadow-xl">
-              <h2 className="text-2xl font-bold text-pink-500 mb-4">Overall Stats</h2>
-              <div className="text-5xl font-extrabold text-gray-800 mb-6">{totalStudents} Students</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-green-100 p-6 rounded-2xl flex justify-between items-center shadow">
-                  <div>
-                    <p className="text-lg font-semibold">Present Today</p>
-                    <p className="text-sm text-gray-600">{((presentToday / totalStudents) * 100 || 0).toFixed(0)}%</p>
-                  </div>
-                  <span className="text-green-700 font-bold text-2xl">{presentToday} Student</span>
+      <div className="flex-1 mb-12 pt-16">
+        {/* Dashboard content */}
+        <main className="flex-1 overflow-y-auto p-4">
+          <div className="">
+            {/* Stats row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Students</span>
+                  <span className="mt-2 text-2xl font-bold text-gray-800">{totalStudents}</span>
+                  <span className="mt-1 text-xs text-gray-500">Registered students</span>
                 </div>
-                <div className="bg-red-100 p-6 rounded-2xl flex justify-between items-center shadow">
-                  <div>
-                    <p className="text-lg font-semibold">Absent Today</p>
-                    <p className="text-sm text-gray-600">{((absentToday / totalStudents) * 100 || 0).toFixed(0)}%</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Present Today</span>
+                  <div className="flex items-baseline mt-2">
+                    <span className="text-2xl font-bold text-gray-800">{presentToday}</span>
+                    <span className="ml-2 text-xs font-medium text-green-500">
+                      {((presentToday / totalStudents) * 100 || 0).toFixed(0)}%
+                    </span>
                   </div>
-                  <span className="text-red-600 font-bold text-2xl">{absentToday} Students</span>
+                  <span className="mt-1 text-xs text-gray-500">Students in attendance</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Absent Today</span>
+                  <div className="flex items-baseline mt-2">
+                    <span className="text-2xl font-bold text-gray-800">{absentToday}</span>
+                    <span className="ml-2 text-xs font-medium text-red-500">
+                      {((absentToday / totalStudents) * 100 || 0).toFixed(0)}%
+                    </span>
+                  </div>
+                  <span className="mt-1 text-xs text-gray-500">Missing students</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Activities</span>
+                  <div className="flex items-baseline mt-2">
+                    <span className="text-2xl font-bold text-gray-800">
+                      {!magazineLoading ? activities.reduce((sum, activity) => sum + calculateActivityTotal(activity), 0) : "-"}
+                    </span>
+                  </div>
+                  <span className="mt-1 text-xs text-gray-500">Total this month</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Magazine Progress - 3/12 */}
-          <div className='lg:col-span-3 flex flex-col gap-6'>
-          <MagazineProgress />
-            </div>
+            {/* Batches and Activities Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+              {/* Batch attendance section - Takes 2/3 width on desktop */}
+              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-medium text-gray-800">Batch Attendance</h3>
+                  <div className="text-xs text-gray-500">Today's data</div>
+                </div>
 
-          {/* Batch Attendance - 9/12 */}
-          <div className="lg:col-span-9 bg-white p-6 rounded-3xl shadow-xl h-fit">
-            <h2 className="text-2xl font-bold text-pink-500 mb-6">Batch Attendance</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(batchStats).map(([batchName, stats], index) => (
-                <div
-                  key={index}
-                  className="flex flex-col bg-pink-50 rounded-3xl border border-pink-100 shadow-md p-4 hover:shadow-lg transition"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-pink-400 text-white text-xl flex items-center justify-center rounded-full shadow-lg">
-                        📘
+                <div className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(batchStats).map(([batchName, stats], index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-700">Batch {batchName}</h4>
+                          <p className="text-xs text-gray-500 mt-1">Total: {stats.total} students</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-bold text-xl text-blue-600">{stats.present}</div>
+                          <p className="text-xs text-gray-500">Present</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-base sm:text-lg mb-1">Batch {batchName}</p>
-                      <div className="flex justify-between items-center text-xs text-gray-600">
-                        <p>Total: <span className="font-medium">{stats.total}</span></p>
-                        <span className="bg-pink-100 text-pink-600 font-semibold px-3 py-1 rounded-full shadow-sm text-xs">
-                          {stats.present} Present
-                        </span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                {/* Header */}
+                <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">📰 Magazine Activities</h3>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="text-sm bg-gray-50 border border-gray-300 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {Object.keys(monthMapping).map((month) => (
+                      <option key={month} value={month}>{month}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  {magazineLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activities.map((activity) => (
+                        <div key={activity} className="bg-gray-50 rounded-lg p-4 hover:shadow-sm transition duration-200 ease-in-out">
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-sm font-medium text-gray-700">{activity}</h4>
+                            <span className="text-lg font-bold text-blue-600">{calculateActivityTotal(activity)}</span>
+                          </div>
+                        </div>
+                      ))}
+                      <button className="w-full py-2.5 mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all duration-200">
+                        View Details
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
-          </div>
-        </div>
 
+            {/* Top Toppers Section */}
+            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <h3 className="text-lg font-semibold text-gray-900">🏆 Top Performers by Batch</h3>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="text-sm bg-gray-50 border border-gray-300 rounded-md py-1.5 px-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.keys(monthMapping).map((month) => (
+                    <option key={month} value={month}>{month}</option>
+                  ))}
+                </select>
+              </div>
 
+              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(topToppers).map(([batch, students]) => (
+                  <div key={batch} className="bg-gray-50 rounded-xl p-4 hover:shadow transition duration-200 ease-in-out">
+                    <h4 className="text-sm font-semibold text-gray-700 pb-2 mb-3 border-b border-gray-200">
+                      🎓 Batch {batch}
+                    </h4>
 
-        {/* <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h2 className="text-lg font-semibold text-pink-500 mb-4">Attendance Over Time</h2>
-            <div className="w-full h-48 bg-pink-50 rounded-xl flex items-center justify-center shadow-inner">
-             
+                    {students.length > 0 ? (
+                      <ul className="space-y-3">
+                        {students.map((student, index) => {
+                          const rankColors = [
+                            'bg-yellow-400 text-yellow-900',
+                            'bg-gray-400 text-white',
+                            'bg-amber-700 text-white',
+                          ];
+                          const badgeColor = rankColors[index] || 'bg-blue-500 text-white';
+                          return (
+                            <li key={student._id || index} className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${badgeColor}`}>
+                                  {index + 1}
+                                </span>
+                                <span className="text-sm text-gray-800 font-medium">{student.name}</span>
+                              </div>
+                              <span className="text-sm font-bold text-blue-600">{student.total}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500 italic">
+                        No data available
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center justify-between">
-            <h2 className="text-lg font-semibold text-pink-500 mb-4">Performance Score</h2>
-            <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center shadow-inner text-2xl font-bold text-pink-700">
-              720
-            </div>
-            <p className="text-sm text-gray-600 mt-3 mb-2">Excellent</p>
-            <button className="px-4 py-2 bg-pink-400 text-white rounded-full hover:bg-pink-500 transition">
-              Explore Benefits
-            </button>
           </div>
-        </div> */}
+        </main>
       </div>
     </div>
-
-
-
-
   );
 };
 
