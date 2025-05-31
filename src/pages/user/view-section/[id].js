@@ -354,7 +354,11 @@ export default function EditTable() {
           tableDescription: tableToSave.tableDescription || "",
           totalMarks: tableToSave.totalMarks || [],
           maxMarks: tableToSave.maxMarks || [],
-          percentage: tableToSave.percentage || []
+          percentage: tableToSave.percentage || [],
+
+          pointTotal: tableToSave.pointTotal || [],
+          maxPointTotal: tableToSave.maxPointTotal || [],
+          pointPercentage: tableToSave.pointPercentage || []
         }
       };
 
@@ -506,7 +510,7 @@ export default function EditTable() {
 
 
                             {/* Marks */}
-                            {['mark', 'max-mark'].includes(column.type) && (
+                            {/* {['mark', 'max-mark'].includes(column.type) && (
                               <input
                                 type="number"
                                 className="w-full h-full block border-none px-3 sm:px-4 py-2 text-gray-700 focus:outline-none text-center"
@@ -518,7 +522,22 @@ export default function EditTable() {
                                 }
                                 aria-label={`Enter ${column.name} mark`}
                               />
+                            )} */}
+                            {/* Marks & Points */}
+                            {['mark', 'max-mark', 'point', 'max-point'].includes(column.type) && (
+                              <input
+                                type="number"
+                                className="w-full h-full block border-none px-3 sm:px-4 py-2 text-gray-700 focus:outline-none text-center"
+                                name={`data[${rowIndex}][columns][${columnIndex}][value]`}
+                                defaultValue={column.value}
+                                readOnly={!column.isEditable}
+                                onChange={(e) =>
+                                  handleInputChange(tableIndex, rowIndex, columnIndex, e.target.value)
+                                }
+                                aria-label={`Enter ${column.name} value`}
+                              />
                             )}
+
                           </td>
                         ))}
                       </tr>
@@ -528,23 +547,43 @@ export default function EditTable() {
                   <tfoot className="bg-gray-50 text-gray-700 text-sm sm:text-base font-light shadow-inner">
                     <tr className="transition-all duration-150 hover:bg-green-50">
                       <td colSpan="100%" className="px-4 py-4 sm:py-5">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6">
-                          <div aria-label={`Total marks: ${table.totalMarks}`}>
-                            <span className="text-gray-600">Total Marks:</span>{' '}
-                            <span className="text-green-500 font-bold text-base sm:text-lg">{table.totalMarks}</span>
+                        {['mark', 'max-mark'].some(type => table.columns.some(col => col.type === type)) ? (
+                          // Marks Summary
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6">
+                            <div aria-label={`Total marks: ${table.totalMarks}`}>
+                              <span className="text-gray-600">Total Marks:</span>{' '}
+                              <span className="text-green-500 font-bold text-base sm:text-lg">{table.totalMarks}</span>
+                            </div>
+                            <div aria-label={`Max marks: ${table.maxMarks}`}>
+                              <span className="text-gray-600">Max Marks:</span>{' '}
+                              <span className="text-green-500 font-bold text-base sm:text-lg">{table.maxMarks}</span>
+                            </div>
+                            <div aria-label={`Percentage: ${table.percentage}%`}>
+                              <span className="text-gray-600">Percentage:</span>{' '}
+                              <span className="text-green-500 font-bold text-base sm:text-lg">{table.percentage}%</span>
+                            </div>
                           </div>
-                          <div aria-label={`Max marks: ${table.maxMarks}`}>
-                            <span className="text-gray-600">Max Marks:</span>{' '}
-                            <span className="text-green-500 font-bold text-base sm:text-lg">{table.maxMarks}</span>
+                        ) : (
+                          // Points Summary
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6">
+                            <div aria-label={`Total points: ${table.pointTotal}`}>
+                              <span className="text-gray-600">Total Points:</span>{' '}
+                              <span className="text-blue-500 font-bold text-base sm:text-lg">{table.pointTotal}</span>
+                            </div>
+                            <div aria-label={`Max points: ${table.maxPointTotal}`}>
+                              <span className="text-gray-600">Max Points:</span>{' '}
+                              <span className="text-blue-500 font-bold text-base sm:text-lg">{table.maxPointTotal}</span>
+                            </div>
+                            <div aria-label={`Percentage: ${table.pointPercentage}%`}>
+                              <span className="text-gray-600">Percentage:</span>{' '}
+                              <span className="text-blue-500 font-bold text-base sm:text-lg">{table.pointPercentage}%</span>
+                            </div>
                           </div>
-                          <div aria-label={`Percentage: ${table.percentage}%`}>
-                            <span className="text-gray-600">Percentage:</span>{' '}
-                            <span className="text-green-500 font-bold text-base sm:text-lg">{table.percentage}%</span>
-                          </div>
-                        </div>
+                        )}
                       </td>
                     </tr>
                   </tfoot>
+
                 </table>
               </div>
 

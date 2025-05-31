@@ -19,7 +19,7 @@ const tableSchema = new mongoose.Schema(
                 },
                 type: {
                     type: String,
-                    enum: ["text", "radio", "mark", "max-mark"], // Column Type
+                    enum: ["text", "radio", "mark", "max-mark", "point", "max-point"], // Column Type
                     required: true,
                 },
                 isEditable: {
@@ -41,7 +41,7 @@ const tableSchema = new mongoose.Schema(
                         value: String, // Editable Value Here
                         type: {
                             type: String,
-                            enum: ["text", "radio", "mark", "max-mark"], // Type Store in Data Also
+                            enum: ["text", "radio", "mark", "max-mark", "point", "max-point"], // Type Store in Data Also
                         },
                         isEditable: {
                             type: Boolean
@@ -61,6 +61,19 @@ const tableSchema = new mongoose.Schema(
         percentage: {
             type: [Number],
             default: [], // Automatically Calculate Percentage
+        },
+        // Points-related fields
+        pointTotal: {
+            type: [Number],
+            default: [],
+        },
+        maxPointTotal: {
+            type: [Number],
+            default: [],
+        },
+        pointPercentage: {
+            type: [Number],
+            default: [],
         },
         tableDescription: {
             type: String,

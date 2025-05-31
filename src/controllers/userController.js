@@ -342,7 +342,10 @@ export const saveUserTable = async (req) => {
                 tableDescription: table.tableDescription || "",
                 totalMarks: table.totalMarks || [],
                 maxMarks: table.maxMarks || [],
-                percentage: table.percentage || []
+                percentage: table.percentage || [],
+                pointTotal: table.pointTotal || [],
+                maxPointTotal: table.maxPointTotal || [],
+                pointPercentage: table.pointPercentage || [],
             };
             console.log("Creating new UserTableData with:", JSON.stringify(newTableData, null, 2));
             existingTable = new UserTableData(newTableData);
@@ -356,6 +359,11 @@ export const saveUserTable = async (req) => {
             existingTable.totalMarks = table.totalMarks || existingTable.totalMarks;
             existingTable.maxMarks = table.maxMarks || existingTable.maxMarks;
             existingTable.percentage = table.percentage || existingTable.percentage;
+
+            existingTable.pointTotal = table.pointTotal || existingTable.pointTotal;
+            existingTable.maxPointTotal = table.maxPointTotal || existingTable.maxPointTotal;
+            existingTable.pointPercentage = table.pointPercentage || existingTable.pointPercentage;
+
             existingTable.table = tableRefObjectId;
 
             if (Array.isArray(table.data)) {
@@ -395,61 +403,6 @@ function getUserIdFromToken(token) {
 
 
 
-
-
-// export const calcSections = async (req, res) => {
-//     console.log("recived!...", req.body);
-//     console.log("recived!...", req.query);
-//     try {
-//         await db();
-//         const { category } = req.query;
-//         const token = req.cookies?.authToken;
-
-//         if (!token) {
-//             return { status: 401, data: { error: "Unauthorized" } };
-//         }
-
-//         const userId = getUserIdFromToken(token);
-//         console.log("User (raw):", userId);
-
-//         if (!userId || !category) {
-//             return { status: 400, data: { message: "User ID, category are required" } };
-//         }
-
-//         // Fetch all admin sections for this category
-//         const adminSections = await Section.find({ sectionCategory: category });
-//         console.log(adminSections);
-//         const totalMaxScore = adminSections.reduce(
-//             (sum, section) => sum + (section.maxMark || 0),
-//             0
-//         );
-//         console.log("max---", totalMaxScore);
-//         const totalSections = adminSections.length;
-
-//         // Fetch all answers from the user
-//         const userDatas = await UserTableData.find({ user: userId });
-//         console.log('userrrr', userDatas);
-//         const totalUserScore = userDatas.reduce(
-//             (sum, answer) => sum + (answer.score || 0),
-//             0
-//         );
-
-//         const sectionsCompleted = userDatas.length;
-
-//         return res.status(200).json({
-//             totalMaxScore,
-//             totalUserScore,
-//             sectionsCompleted,
-//             totalSections,
-//             avgScore: totalMaxScore
-//                 ? Math.round((totalUserScore / totalMaxScore) * 100)
-//                 : 0,
-//         });
-//     } catch (error) {
-//         console.error("Error in calcSection:", error);
-//         res.status(500).json({ error: "Server Error" });
-//     }
-// };
 // export const calcSections = async (req, res) => {
 //     console.log("📥 Received Request Body:", req.body);
 //     console.log("📥 Received Query:", req.query);
@@ -464,42 +417,55 @@ function getUserIdFromToken(token) {
 //         }
 
 //         const userId = getUserIdFromToken(token);
-//         console.log("🔐 User ID:", userId);
-
 //         if (!userId || !category) {
 //             return res.status(400).json({ message: "User ID and category are required" });
 //         }
 
-//         // 🔍 Fetch all sections for this category
+//         // ✅ Get admin section info for this category
 //         const adminSections = await Section.find({ sectionCategory: category });
 //         const totalSections = adminSections.length;
 
-//         // 📊 Fetch all table data for this user
+//         // Step 1: Find sections for the category
+//         const sections = await Section.find({ sectionCategory: category }).select('_id');
+//         const sectionIds = sections.map((s) => s._id);
+
+//         // Step 2: Find tables linked to those sections
+//         const adminTable = await Table.find({ section: { $in: sectionIds } });
+
+//         // Step 3: Calculate total max marks from tables
+//         const totalMaxScore = adminTable.reduce((sum, table) => {
+//             const tableMax = Array.isArray(table.maxMarks)
+//                 ? table.maxMarks.reduce((acc, val) => acc + (Number(val) || 0), 0)
+//                 : 0;
+//             return sum + tableMax;
+//         }, 0);
+
+
+//         // ✅ Get user data (saved tables)
 //         const userDatas = await UserTableData.find({ user: userId });
 //         const sectionsCompleted = userDatas.length;
 
-//         // 🔢 Calculate total marks and max marks from user tables
+//         // 🧮 Total user score from saved tables
 //         let totalUserScore = 0;
-//         let totalMaxScore = 0;
 
 //         userDatas.forEach((table) => {
-//             const tableTotal = Array.isArray(table.totalMarks) ? Number(table.totalMarks[0] || 0) : 0;
-//             const tableMax = Array.isArray(table.maxMarks) ? Number(table.maxMarks[0] || 0) : 0;
-
+//             const tableTotal = Array.isArray(table.totalMarks)
+//                 ? Number(table.totalMarks[0] || 0)
+//                 : 0;
 //             totalUserScore += tableTotal;
-//             totalMaxScore += tableMax;
 //         });
 
+//         // 📊 Calculate percentage
 //         const avgScore = totalMaxScore
 //             ? Math.round((totalUserScore / totalMaxScore) * 100)
 //             : 0;
 
 //         return res.status(200).json({
-//             totalMaxScore,
-//             totalUserScore,
+//             totalMaxScore,         // from admin section
+//             totalUserScore,        // from saved user tables
 //             sectionsCompleted,
 //             totalSections,
-//             avgScore, // in percentage
+//             avgScore,
 //         });
 
 //     } catch (error) {
@@ -507,6 +473,8 @@ function getUserIdFromToken(token) {
 //         return res.status(500).json({ error: "Server Error" });
 //     }
 // };
+
+
 export const calcSections = async (req, res) => {
     console.log("📥 Received Request Body:", req.body);
     console.log("📥 Received Query:", req.query);
@@ -544,6 +512,13 @@ export const calcSections = async (req, res) => {
             return sum + tableMax;
         }, 0);
 
+        // Step 3.1: Calculate total max points from tables
+        const totalMaxPoints = adminTable.reduce((sum, table) => {
+            const tableMaxPoints = Array.isArray(table.maxPointTotal)
+                ? table.maxPointTotal.reduce((acc, val) => acc + (Number(val) || 0), 0)
+                : 0;
+            return sum + tableMaxPoints;
+        }, 0);
 
         // ✅ Get user data (saved tables)
         const userDatas = await UserTableData.find({ user: userId });
@@ -551,12 +526,18 @@ export const calcSections = async (req, res) => {
 
         // 🧮 Total user score from saved tables
         let totalUserScore = 0;
+        let totalUserPoints = 0;
 
         userDatas.forEach((table) => {
             const tableTotal = Array.isArray(table.totalMarks)
                 ? Number(table.totalMarks[0] || 0)
                 : 0;
             totalUserScore += tableTotal;
+
+            const tablePoints = Array.isArray(table.pointTotal)
+                ? Number(table.pointTotal[0] || 0)
+                : 0;
+            totalUserPoints += tablePoints;
         });
 
         // 📊 Calculate percentage
@@ -564,12 +545,19 @@ export const calcSections = async (req, res) => {
             ? Math.round((totalUserScore / totalMaxScore) * 100)
             : 0;
 
+        const avgPoints = totalMaxPoints
+            ? Math.round((totalUserPoints / totalMaxPoints) * 100)
+            : 0;
+
         return res.status(200).json({
             totalMaxScore,         // from admin section
             totalUserScore,        // from saved user tables
+            totalMaxPoints,        // from admin section
+            totalUserPoints,       // from saved user tables
             sectionsCompleted,
             totalSections,
             avgScore,
+            avgPoints,
         });
 
     } catch (error) {
@@ -577,151 +565,3 @@ export const calcSections = async (req, res) => {
         return res.status(500).json({ error: "Server Error" });
     }
 };
-
-// export const saveUserTable = async (req) => {
-//     try {
-//         await db(); // Ensure DB connection
-
-//         const { sectionId, table } = req.body; // Expect user & section to find/create the table
-//         console.log("recived:", req.body);
-//         const token = req.cookies?.authToken;
-
-//         if (!token) {
-//             return { status: 401, data: { error: "Unauthorized" } };
-//         }
-
-//         const userId = getUserIdFromToken(token);
-//         console.log("user:", userId);
-
-//         if (!userId || !sectionId || !table) {
-//             return { status: 400, data: { message: "User ID, Section ID, and Table Data are required" } };
-//         }
-
-//         let existingTable = await UserTableData.findOne({ user: userId, section: sectionId });
-
-//         if (!existingTable) {
-//             // If no table exists, create a new one
-//             existingTable = new UserTableData({
-//                 user: userId,
-//                 section: sectionId,
-//                 table: table.tableId,
-//                 columns: table.columns,
-//                 rowsCount: table.rowsCount || 0,
-//                 data: table.data || [],
-//                 tableDescription: table.tableDescription || "",
-//                 totalMarks: [],
-//                 maxMarks: [],
-//                 percentage: [],
-//             });
-//         } else {
-//             // If table exists, update it
-//             existingTable.columns = table.columns;
-//             existingTable.rowsCount = table.rowsCount;
-
-//             if (Array.isArray(table.data)) {
-//                 existingTable.data = table.data.map((row) => ({
-//                     rowNumber: row.rowNumber,
-//                     columns: row.columns.map((col, colIndex) => ({
-//                         columnName: table.columns[colIndex]?.name,
-//                         value: col.value || "",
-//                         type: col.type || "text",
-//                         isEditable: table.columns[colIndex]?.isEditable ?? false,
-//                     })),
-//                 }));
-//             }
-//         }
-
-//         await existingTable.save();
-
-//         return { status: 200, data: { message: "Table saved successfully", table: existingTable } };
-//     } catch (error) {
-//         console.error("Error saving table:", error);
-//         return { status: 500, data: { message: "Server Error", error: error.message } };
-//     }
-// };
-
-
-
-// function getUserIdFromToken(token) {
-//     try {
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         return decoded.userId;
-//     } catch (error) {
-//         return null;
-//     }
-// }
-
-
-
-// export async function saveUserTable(req, res) {
-//     await db(); // Ensure DB connection
-//     console.log("📥 Incoming Request Body:", req.body);
-
-//     const token = req.cookies?.authToken;
-//     if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-//     try {
-//         const userId = getUserIdFromToken(token); // Extract user ID from token
-//         const { sectionId, tableId, data: rawData } = req.body;
-
-//         if (!userId || !sectionId || !tableId || typeof rawData !== "object") {
-//             return res.status(400).json({ error: "Invalid or missing data." });
-//         }
-
-//         // ✅ Convert raw data into a structured format
-//         const formattedData = parseTableData(rawData);
-
-//         // 🔍 Find existing user table entry
-//         let userTable = await UserTableData.findOne({ user: userId, table: tableId });
-
-//         if (userTable) {
-//             userTable.data = formattedData;
-//             userTable.rowsCount = formattedData.length; // Update rows count
-//             userTable.updatedAt = new Date();
-//         } else {
-//             userTable = new UserTableData({
-//                 user: userId,
-//                 section: sectionId,
-//                 table: tableId,
-//                 rowsCount: formattedData.length,
-//                 data: formattedData,
-//             });
-//         }
-
-//         await userTable.save();
-//         return res.status(200).json({ message: "Table data saved successfully!", userTable });
-//     } catch (error) {
-//         console.error("❌ Error saving user table:", error);
-//         return res.status(500).json({ error: "Internal Server Error" });
-//     }
-// }
-// function getUserIdFromToken(token) {
-//     try {
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         return decoded.userId;
-//     } catch (error) {
-//         return null;
-//     }
-// }
-// function parseTableData(rawData) {
-//     const parsedData = [];
-
-//     Object.keys(rawData).forEach((key) => {
-//         const match = key.match(/^data\[(\d+)]\[columns]\[(\d+)]\[value]$/);
-//         if (match) {
-//             const rowIndex = Number(match[1]);
-//             const colIndex = Number(match[2]);
-
-//             if (!parsedData[rowIndex]) parsedData[rowIndex] = { rowNumber: rowIndex + 1, columns: [] };
-
-//             parsedData[rowIndex].columns[colIndex] = {
-//                 columnName: `Column ${colIndex + 1}`,
-//                 value: rawData[key] || "",
-//                 type: "text",
-//                 isEditable: true, // Adjust if needed
-//             };
-//         }
-//     });
-
-//     return parsedData;
-// }

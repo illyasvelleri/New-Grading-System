@@ -37,7 +37,7 @@ const AttendanceDashboard = () => {
                     });
 
                     setAttendanceData(attendanceMap);
-                    
+
                     const presentCount = Object.values(attendanceMap).filter(
                         (status) => status === 'present'
                     ).length;
@@ -84,16 +84,16 @@ const AttendanceDashboard = () => {
             ...prev,
             [studentId]: status,
         }));
-    
+
         // 2. Update attendance data and stats
         const newAttendanceData = { ...attendanceData, [studentId]: status };
         setAttendanceData(newAttendanceData);
-    
+
         const presentCount = Object.values(newAttendanceData).filter((val) => val === 'present').length;
         setPresentToday(presentCount);
         setAbsentToday(students.length - presentCount);
         setTotalPercentage(((presentCount / students.length) * 100).toFixed(2));
-    
+
         // 3. Send to backend
         try {
             await axios.post('/api/studentPortal/attendance', {
@@ -105,7 +105,7 @@ const AttendanceDashboard = () => {
             console.error('Error updating attendance:', error);
         }
     };
-    
+
 
     const handleSaveAttendance = async (studentId) => {
         const total = attendanceData[studentId];
@@ -259,31 +259,29 @@ const AttendanceDashboard = () => {
                             {/* Attendance Controls */}
                             <div className="mt-5 z-10 relative">
                                 {viewMode === 'day' ? (
-                                   <div className="flex gap-3 flex-wrap">
-                                   <button
-    onClick={() => handleAttendanceMark(student._id, 'present')}
-    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition ${
-        attendanceData[student._id] === 'present'
-            ? 'bg-green-500 hover:bg-green-600 text-white'
-            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-    }`}
->
-    ✅ Present
-</button>
+                                    <div className="flex gap-3 flex-wrap">
+                                        <button
+                                            onClick={() => handleAttendanceMark(student._id, 'present')}
+                                            className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition ${attendanceData[student._id] === 'present'
+                                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                                }`}
+                                        >
+                                            ✅ Present
+                                        </button>
 
-<button
-    onClick={() => handleAttendanceMark(student._id, 'absent')}
-    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition ${
-        attendanceData[student._id] === 'absent'
-            ? 'bg-red-500 hover:bg-red-600 text-white'
-            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-    }`}
->
-    ❌ Absent
-</button>
+                                        <button
+                                            onClick={() => handleAttendanceMark(student._id, 'absent')}
+                                            className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition ${attendanceData[student._id] === 'absent'
+                                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                                }`}
+                                        >
+                                            ❌ Absent
+                                        </button>
 
-                               </div>
-                               
+                                    </div>
+
                                 ) : (
                                     <div className="flex flex-wrap items-center gap-3">
                                         {/* Present Days Input */}

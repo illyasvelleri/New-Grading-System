@@ -211,6 +211,8 @@ export default function ViewSectionPage() {
                                         <option value="radio">Radio</option>
                                         <option value="mark">Mark</option>
                                         <option value="max-mark">Max Mark</option>
+                                        <option value="point">Point</option>
+                                        <option value="max-point">Max Point</option>
                                     </select>
                                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap">
                                         <input

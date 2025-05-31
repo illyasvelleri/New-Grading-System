@@ -286,12 +286,56 @@ export const getEditableTable = async (req, res) => {
 };
 
 
+// export const updateTable = async (req, res) => {
+//     console.log("rciveeeeee", req.body);
+//     try {
+//         const { id } = req.query;
+//         const { table } = req.body;
+//         console.log(req.body);
+//         if (!id || !table) {
+//             return res.status(400).json({ message: "Table ID and Data are required" });
+//         }
+
+//         const existingTable = await Table.findById(id);
+//         if (!existingTable) {
+//             return res.status(404).json({ message: "Table not found" });
+//         }
+
+//         // Update table properties
+//         existingTable.tableName = table.tableName;
+//         existingTable.columns = table.columns;
+
+//         // ✅ Ensure each cell respects the column's `isEditable`
+//         if (Array.isArray(table.data)) {
+//             existingTable.data = table.data.map((row, rowIndex) => ({
+//                 rowNumber: row.rowNumber,
+//                 columns: row.columns.map((col, colIndex) => ({
+//                     columnName: table.columns[colIndex]?.name,
+//                     value: col.value || "",
+//                     type: col.type || "text",
+//                     isEditable: table.columns[colIndex]?.isEditable ?? false, // Ensuring correct editability
+//                 })),
+//             }));
+//             const { maxMarks } = calculateMaxMarksOnly(existingTable.data);
+//             existingTable.maxMarks = maxMarks;
+//             existingTable.tableDescription = table.tableDescription;
+
+//         }
+
+//         await existingTable.save();
+//         return res.status(200).json({ message: "Table updated successfully", table: existingTable });
+//     } catch (error) {
+//         console.error("Error updating table:", error);
+//         res.status(500).json({ message: "Server Error" });
+//     }
+// };
+
 export const updateTable = async (req, res) => {
-    console.log("rciveeeeee", req.body);
+    console.log("Received:", req.body);
     try {
         const { id } = req.query;
         const { table } = req.body;
-        console.log(req.body);
+
         if (!id || !table) {
             return res.status(400).json({ message: "Table ID and Data are required" });
         }
@@ -301,11 +345,11 @@ export const updateTable = async (req, res) => {
             return res.status(404).json({ message: "Table not found" });
         }
 
-        // Update table properties
+        // Update basic table properties
         existingTable.tableName = table.tableName;
         existingTable.columns = table.columns;
+        existingTable.tableDescription = table.tableDescription;
 
-        // ✅ Ensure each cell respects the column's `isEditable`
         if (Array.isArray(table.data)) {
             existingTable.data = table.data.map((row, rowIndex) => ({
                 rowNumber: row.rowNumber,
@@ -313,12 +357,14 @@ export const updateTable = async (req, res) => {
                     columnName: table.columns[colIndex]?.name,
                     value: col.value || "",
                     type: col.type || "text",
-                    isEditable: table.columns[colIndex]?.isEditable ?? false, // Ensuring correct editability
+                    isEditable: table.columns[colIndex]?.isEditable ?? false,
                 })),
             }));
-            const { maxMarks } = calculateMaxMarksOnly(existingTable.data);
-            existingTable.maxMarks = maxMarks;
-            existingTable.tableDescription = table.tableDescription;
+
+            // Dynamically calculate max values depending on available types
+            const { maxMarks, maxPoints } = calculateMaxValues(existingTable.data);
+            if (maxMarks) existingTable.maxMarks = maxMarks;
+            if (maxPoints) existingTable.maxPointTotal = maxPoints;
 
         }
 
@@ -330,21 +376,29 @@ export const updateTable = async (req, res) => {
     }
 };
 
-const calculateMaxMarksOnly = (data) => {
-    let maxTotal = 0;
+
+const calculateMaxValues = (data) => {
+    let maxMarks = 0;
+    let maxPoints = 0;
 
     data.forEach(row => {
         row.columns.forEach(col => {
+            const value = Number(col.value) || 0;
+
             if (col.type === "max-mark") {
-                maxTotal += Number(col.value) || 0;
+                maxMarks += value;
+            } else if (col.type === "max-point") {
+                maxPoints += value;
             }
         });
     });
 
     return {
-        maxMarks: [maxTotal]
+        maxMarks: maxMarks > 0 ? [maxMarks] : null,
+        maxPoints: maxPoints > 0 ? [maxPoints] : null
     };
 };
+
 
 
 export const getAllUsers = async (req, res) => {
@@ -384,6 +438,162 @@ export const getTablesByUserAndSection = async (userId, sectionId) => {
 };
 
 
+// export const updateMark = async (req) => {
+//     const { userId, tableId, data } = req.body;
+
+//     console.log("📝 Incoming Request:", { userId, tableId, data });
+
+//     await db();
+
+//     const userTableData = await UserTableData.findOne({
+//         _id: tableId,
+//         user: userId,
+//     });
+
+//     if (!userTableData) {
+//         console.error("❌ Table not found for user");
+//         return { status: 404, data: { error: "Table not found" } };
+//     }
+
+//     for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+//         const row = data[rowIndex];
+//         const originalRow = userTableData.data[rowIndex];
+
+//         for (let colIndex = 0; colIndex < row.columns.length; colIndex++) {
+//             const col = row.columns[colIndex];
+
+//             // 🔍 Instead of using originalCol.columnName, use incoming col.type
+//             if (["mark", "max-mark"].includes(col.type?.toLowerCase())) {
+//                 // Find matching column in original data by type
+//                 const targetCol = originalRow.columns.find(
+//                     (c) => c.type?.toLowerCase() === col.type?.toLowerCase()
+//                 );
+
+//                 if (targetCol) {
+//                     console.log(`✅ Updating ${col.type} →`, col.value);
+//                     targetCol.value = col.value;
+//                 } else {
+//                     console.warn("⚠️ Column with type not found:", col.type);
+//                 }
+//             }
+//         }
+//     }
+
+//     // 🔢 Calculate totalMarks (only marks)
+//     const { marksTotal } = calculateMarksOnly(userTableData.data);
+//     userTableData.totalMarks = marksTotal;
+
+
+
+//     // 🧮 Calculate percentage if maxMarks exist
+//     const max = userTableData.maxMarks?.[0] || 0;
+//     const percentage = max > 0 ? ((marksTotal[0] / max) * 100).toFixed(2) : 0;
+//     userTableData.percentage = [Number(percentage)];
+
+//     userTableData.markModified("data");
+
+//     try {
+//         await userTableData.save();
+//         console.log("✅ ✅ Saved table with total and percentage:", JSON.stringify(userTableData.data, null, 2));
+//         return { status: 200, data: { message: "Marks updated successfully" } };
+//     } catch (err) {
+//         console.error("❌ Failed to save:", err);
+//         return { status: 500, data: { error: "Failed to save data" } };
+//     }
+// };
+
+
+// const calculateMarksOnly = (data) => {
+//     let marksTotal = 0;
+//     data.forEach(row => {
+//         row.columns.forEach(col => {
+//             if (col.type === "mark") {
+//                 marksTotal += Number(col.value) || 0;
+//             }
+//         });
+//     });
+//     return { marksTotal: [marksTotal] };
+// };
+
+
+// export const updateMark = async (req) => {
+//     const { userId, tableId, data } = req.body;
+
+//     console.log("📝 Incoming Request:", { userId, tableId, data });
+
+//     await db();
+
+//     const userTableData = await UserTableData.findOne({
+//         _id: tableId,
+//         user: userId,
+//     });
+
+//     if (!userTableData) {
+//         console.error("❌ Table not found for user");
+//         return { status: 404, data: { error: "Table not found" } };
+//     }
+
+//     for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+//         const row = data[rowIndex];
+//         const originalRow = userTableData.data[rowIndex];
+
+//         for (let colIndex = 0; colIndex < row.columns.length; colIndex++) {
+//             const col = row.columns[colIndex];
+
+//             // 🔍 Instead of using originalCol.columnName, use incoming col.type
+//             if (["mark", "max-mark"].includes(col.type?.toLowerCase())) {
+//                 // Find matching column in original data by type
+//                 const targetCol = originalRow.columns.find(
+//                     (c) => c.type?.toLowerCase() === col.type?.toLowerCase()
+//                 );
+
+//                 if (targetCol) {
+//                     console.log(`✅ Updating ${col.type} →`, col.value);
+//                     targetCol.value = col.value;
+//                 } else {
+//                     console.warn("⚠️ Column with type not found:", col.type);
+//                 }
+//             }
+//         }
+//     }
+
+//     // 🔢 Calculate totalMarks (only marks)
+//     const { marksTotal } = calculateMarksOnly(userTableData.data);
+//     userTableData.totalMarks = marksTotal;
+
+
+
+//     // 🧮 Calculate percentage if maxMarks exist
+//     const max = userTableData.maxMarks?.[0] || 0;
+//     const percentage = max > 0 ? ((marksTotal[0] / max) * 100).toFixed(2) : 0;
+//     userTableData.percentage = [Number(percentage)];
+
+//     userTableData.markModified("data");
+
+//     try {
+//         await userTableData.save();
+//         console.log("✅ ✅ Saved table with total and percentage:", JSON.stringify(userTableData.data, null, 2));
+//         return { status: 200, data: { message: "Marks updated successfully" } };
+//     } catch (err) {
+//         console.error("❌ Failed to save:", err);
+//         return { status: 500, data: { error: "Failed to save data" } };
+//     }
+// };
+
+
+// const calculateMarksOnly = (data) => {
+//     let marksTotal = 0;
+//     data.forEach(row => {
+//         row.columns.forEach(col => {
+//             if (col.type === "mark") {
+//                 marksTotal += Number(col.value) || 0;
+//             }
+//         });
+//     });
+//     return { marksTotal: [marksTotal] };
+// };
+
+
 export const updateMark = async (req) => {
     const { userId, tableId, data } = req.body;
 
@@ -409,7 +619,7 @@ export const updateMark = async (req) => {
             const col = row.columns[colIndex];
 
             // 🔍 Instead of using originalCol.columnName, use incoming col.type
-            if (["mark", "max-mark"].includes(col.type?.toLowerCase())) {
+            if (["mark", "max-mark", "point", "max-point"].includes(col.type?.toLowerCase())) {
                 // Find matching column in original data by type
                 const targetCol = originalRow.columns.find(
                     (c) => c.type?.toLowerCase() === col.type?.toLowerCase()
@@ -426,15 +636,20 @@ export const updateMark = async (req) => {
     }
 
     // 🔢 Calculate totalMarks (only marks)
-    const { marksTotal } = calculateMarksOnly(userTableData.data);
+    const { marksTotal, pointsTotal } = calculateMarksOnly(userTableData.data);
     userTableData.totalMarks = marksTotal;
-
-
+    userTableData.pointTotal = pointsTotal;
 
     // 🧮 Calculate percentage if maxMarks exist
-    const max = userTableData.maxMarks?.[0] || 0;
-    const percentage = max > 0 ? ((marksTotal[0] / max) * 100).toFixed(2) : 0;
-    userTableData.percentage = [Number(percentage)];
+    // Marks percentage
+    const maxMarks = userTableData.maxMarks?.[0] || 0;
+    const markPercentage = maxMarks > 0 ? ((marksTotal[0] / maxMarks) * 100).toFixed(2) : 0;
+    userTableData.percentage = [Number(markPercentage)];
+
+    // Points percentage (optional)
+    const maxPoints = userTableData.maxPointTotal?.[0] || 0;
+    const pointPercentage = maxPoints > 0 ? ((pointsTotal[0] / maxPoints) * 100).toFixed(2) : 0;
+    userTableData.pointPercentage = [Number(pointPercentage)];
 
     userTableData.markModified("data");
 
@@ -451,16 +666,24 @@ export const updateMark = async (req) => {
 
 const calculateMarksOnly = (data) => {
     let marksTotal = 0;
+    let pointsTotal = 0;
+
     data.forEach(row => {
         row.columns.forEach(col => {
             if (col.type === "mark") {
                 marksTotal += Number(col.value) || 0;
             }
+            if (col.type === "point") {
+                pointsTotal += Number(col.value) || 0;
+            }
         });
     });
-    return { marksTotal: [marksTotal] };
-};
 
+    return {
+        marksTotal: [marksTotal],
+        pointsTotal: [pointsTotal]
+    };
+};
 
 
 
